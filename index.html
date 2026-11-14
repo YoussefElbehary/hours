@@ -240,8 +240,9 @@ dialog::backdrop{background:rgba(0,0,0,.42)}
     <p class="group-title">Period</p>
     <div class="group">
       <label class="field"><span>Period starts on day</span><input type="number" id="setStart" min="1" max="28" inputmode="numeric"></label>
-      <div class="field col"><span>Days off (hours count as extra)</span><div class="days" id="setWeekend"></div></div>
+      <div class="field col"><span>My attendance days</span><div class="days" id="setWorkdays"></div></div>
     </div>
+    <p class="group-note" id="workdaysNote"></p>
 
     <p class="group-title">Display</p>
     <div class="group">
@@ -279,13 +280,18 @@ const DEFAULTS = {
   step: 15,           // rounding step in minutes
   outRound: 'down',   // check-out rounding: down | exact | nearest | up
   periodStart: 16,    // period runs from this day to the day before it next month
-  weekend: [5],       // days off (0=Sun … 6=Sat); hours on these days are pure extra
+  workdays: [2, 4, 6], // attendance days (0=Sun … 6=Sat): Tue, Thu, Sat. Hours on other days are pure extra
   clock24: false
 };
 function load() {
   try {
     const s = JSON.parse(localStorage.getItem(KEY));
-    if (s && s.days && typeof s.days === 'object') return { settings: { ...DEFAULTS, ...s.settings }, days: s.days };
+    if (s && s.days && typeof s.days === 'object') {
+      const settings = { ...DEFAULTS, ...s.settings };
+      delete settings.weekend; // replaced by workdays
+      if (!Array.isArray(settings.workdays) || !settings.workdays.length) settings.workdays = DEFAULTS.workdays.slice();
+      return { settings, days: s.days };
+    }
   } catch (e) {}
   return { settings: { ...DEFAULTS }, days: {} };
 }
@@ -356,7 +362,10 @@ function earliestOut(X) {
     default: return R;
   }
 }
-const isWeekend = k => S().weekend.includes(dateOf(k).getDay());
+const isWeekend = k => !S().workdays.includes(dateOf(k).getDay()); // true = not an attendance day
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const WEEK_ORDER = [6, 0, 1, 2, 3, 4, 5]; // Saturday first
+const daysText = (len = 3) => WEEK_ORDER.filter(d => S().workdays.includes(d)).map(d => DAY_NAMES[d].slice(0, len)).join(', ');
 const typeOf = rec => rec && (rec.type === 'leave' || rec.type === 'half') ? rec.type : 'work';
 
 // One day: what it requires, what it earns (fingerprint hours + half-day/holiday credit)
@@ -401,17 +410,18 @@ function periodByOffset(off) {
 
 const firstLogged = () => Object.keys(state.days).sort()[0];
 
-// Period totals. Every workday (not a day off) from the first logged day on needs `target`;
-// past workdays with nothing logged count as 0h. Today counts once it's finished.
+// Period totals. Every attendance day from the first logged day on needs `target`
+// (e.g. Sat/Tue/Thu × 7h = 42h per 2 weeks); past attendance days with nothing logged count as 0h.
+// Hours on other days are extra. Today counts once it's finished.
 function summarize(p) {
   const st = S(), tk = todayKey(), first = firstLogged();
-  const sum = { worked: 0, credit: 0, required: 0, target: 0, leaveDays: 0, halfDays: 0,
+  const sum = { worked: 0, credit: 0, required: 0, target: 0, targetDays: 0, leaveDays: 0, halfDays: 0,
                 under: 0, late: 0, missing: 0, unlogged: 0, list: [] };
   if (first) {
     const from = first > p.start ? first : p.start;
     for (let k = p.start; k <= p.end; k = addDays(k, 1)) {
       const workday = !isWeekend(k), tracked = k >= from;
-      if (tracked && workday) sum.target += st.target;
+      if (tracked && workday) { sum.target += st.target; sum.targetDays++; }
       if (k > tk) continue;
       const a = analyze(k, state.days[k], k === tk ? nowMin() : null);
       if (!a) {
@@ -470,7 +480,7 @@ function renderToday() {
   if (!rec || !rec.in) {
     const half = type === 'half', pills = [];
     if (half) pills.push(`<span class="pill accent">Half day · ${fmtDur(halfCredit())} credited</span>`);
-    if (!workday) pills.push(`<span class="pill accent">${fmtDate(tk, { weekday: 'long' })} — day off, hours count as extra</span>`);
+    if (!workday) pills.push(`<span class="pill accent">Not an attendance day — hours count as extra</span>`);
     else if (now < st.earliest) pills.push(`<span class="pill">Counting starts at ${fmtClock(st.earliest)}</span>`);
     else if (now >= st.latestOut) pills.push(`<span class="pill bad">After ${fmtClock(st.latestOut)} — nothing counts now</span>`);
     else if (!half) {
@@ -534,7 +544,7 @@ function renderToday() {
     el.innerHTML = `${head}
       <div class="center" style="margin-top:12px">
         <div class="big">${fmtDur(a.worked)}</div>
-        <div class="sub">worked so far${a.credit ? ` + ${fmtDur(a.credit)} half-day` : ''}${a.workday ? '' : ' · day off, all extra'}</div>
+        <div class="sub">worked so far${a.credit ? ` + ${fmtDur(a.credit)} half-day` : ''}${a.workday ? '' : ' · extra day'}</div>
       </div>
       ${progress}
       <div class="inout">
@@ -550,7 +560,7 @@ function renderToday() {
 
   // Finished for today
   const pills = [];
-  if (!a.workday) pills.push('<span class="pill accent">Day off — all extra</span>');
+  if (!a.workday) pills.push('<span class="pill accent">Extra day — all hours are extra</span>');
   if (a.type === 'half') pills.push(`<span class="pill accent">incl. ${fmtDur(a.credit)} half-day</span>`);
   if (a.underMin) pills.push(`<span class="pill bad">Below ${fmtDur(st.minimum)} minimum</span>`);
   if (a.late) pills.push(`<span class="pill bad">Checked in after ${fmtClock(st.latest)}</span>`);
@@ -576,25 +586,25 @@ function renderPeriod() {
   const todayRec = state.days[tk], todayOpen = cur && todayRec && todayRec.in && !todayRec.out;
 
   let hint = '';
-  if (!hasData) hint = 'Check in to start. The period target counts from your first logged day.';
+  if (!hasData) hint = `Your attendance days: <b>${daysText()}</b> (${fmtDur(st.target)} each — change in Settings). Check in to start; the period target counts from your first logged day.`;
   else if (cur) {
     const n = workdaysLeft(p), maxDay = st.latestOut - st.earliest;
     if (b < 0 && n > 0) {
       const avg = ceilTo(st.target + (-b) / n, 5);
       hint = avg <= maxDay
-        ? `To clear <b>${fmtDur(-b)}</b> over the <b>${plural(n, 'workday')}</b> left, average about <b>${fmtDur(avg)}</b> a day.`
-        : `Even ${fmtClock(st.earliest)}–${fmtClock(st.latestOut)} every remaining workday leaves about <b>${fmtDur(-b - n * (maxDay - st.target))}</b> short.`;
+        ? `To clear <b>${fmtDur(-b)}</b> over the <b>${plural(n, 'attendance day')}</b> left, average about <b>${fmtDur(avg)}</b> a day — or come in on an extra day.`
+        : `Even ${fmtClock(st.earliest)}–${fmtClock(st.latestOut)} on every remaining attendance day leaves about <b>${fmtDur(-b - n * (maxDay - st.target))}</b> short — come in on extra days to cover it.`;
     } else if (b < 0) {
-      hint = `No workdays left in this period to make up <b>${fmtDur(-b)}</b>.`;
+      hint = `No attendance days left in this period. Come in on an extra day to make up <b>${fmtDur(-b)}</b>.`;
     } else if (b > 0 && n > 0) {
       const avg = Math.max(st.minimum, floorTo(st.target - b / n, 5));
-      hint = `You're <b>${fmtDur(b)}</b> ahead. You could average <b>${fmtDur(avg)}</b> a day over the <b>${plural(n, 'workday')}</b> left.`;
+      hint = `You're <b>${fmtDur(b)}</b> ahead. You could average <b>${fmtDur(avg)}</b> a day over the <b>${plural(n, 'attendance day')}</b> left.`;
     } else if (n > 0) {
-      hint = `On track. ${fmtDur(st.target)} a day keeps you even — ${plural(n, 'workday')} left.`;
+      hint = `On track. ${fmtDur(st.target)} a day keeps you even — ${plural(n, 'attendance day')} left (${daysText()}).`;
     }
   }
   const flags = [];
-  if (sum.unlogged) flags.push(`<span class="pill warn">${plural(sum.unlogged, 'workday')} not logged</span>`);
+  if (sum.unlogged) flags.push(`<span class="pill warn">${plural(sum.unlogged, 'attendance day')} not logged</span>`);
   if (sum.missing) flags.push(`<span class="pill warn">${plural(sum.missing, 'missing check-out')}</span>`);
   if (sum.under) flags.push(`<span class="pill bad">${plural(sum.under, 'day')} below ${fmtDur(st.minimum)}</span>`);
   if (sum.late) flags.push(`<span class="pill bad">${plural(sum.late, 'late check-in')}</span>`);
@@ -614,7 +624,7 @@ function renderPeriod() {
     </div>
     <div class="stats">
       <div class="stat"><b>${fmtDur(sum.total)}</b><span>done</span></div>
-      <div class="stat"><b>${fmtDur(sum.target)}</b><span>period target</span></div>
+      <div class="stat"><b>${fmtDur(sum.target)}</b><span>target · ${plural(sum.targetDays, 'day')}</span></div>
       <div class="stat"><b>${fmtDur(Math.max(0, sum.target - sum.total))}</b><span>left</span></div>
     </div>
     ${hasData ? `<div class="breakdown">${breakdown.join(' · ')}</div>` : ''}
@@ -629,7 +639,7 @@ function renderPeriod() {
       <div class="row-main"><div class="times warn-t">Not logged</div><div class="row-sub">Tap to add times, holiday or half day</div></div>
       <div class="row-right"><b>0h</b><span class="chip bad">${fmtDiff(-st.target)}</span></div></button>`;
     const flagsTxt = [];
-    if (!a.workday) flagsTxt.push('<span class="flag" style="color:var(--accent)">day off</span>');
+    if (!a.workday) flagsTxt.push('<span class="flag" style="color:var(--accent)">extra day</span>');
     if (a.late) flagsTxt.push('<span class="flag bad-t">late</span>');
     if (a.underMin) flagsTxt.push(`<span class="flag bad-t">&lt; ${fmtDur(st.minimum)}</span>`);
     let main, sub;
@@ -718,7 +728,7 @@ function readForm() {
   let err = '', soft = false;
   if (!date) err = 'Pick a date.';
   else if (date > todayKey()) err = "You can't log a day in the future.";
-  else if (t !== 'work' && isWeekend(date)) err = `${fmtDate(date, { weekday: 'long' })} is already a day off.`;
+  else if (t !== 'work' && isWeekend(date)) err = `${fmtDate(date, { weekday: 'long' })} isn't one of your attendance days (${daysText()}).`;
   else if (t === 'work' && !inT) { err = 'Enter the check-in time.'; soft = true; }
   else if (t === 'half' && outT && !inT) err = 'Add the check-in time too.';
   else if (t !== 'leave' && inT && outT && toMin(outT) <= toMin(inT)) err = 'Check-out must be after check-in.';
@@ -775,7 +785,6 @@ $('#btnDelete').addEventListener('click', () => {
 
 /* ---------- settings dialog ---------- */
 const dlgSettings = $('#dlgSettings');
-const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 function fillSettings() {
   const st = S();
@@ -788,17 +797,18 @@ function fillSettings() {
   $('#setOut').value = st.outRound;
   $('#setStart').value = st.periodStart;
   $('#setClock24').checked = st.clock24;
-  $('#setWeekend').innerHTML = DAY_NAMES.map((n, i) => `<button type="button" data-day="${i}" aria-pressed="${st.weekend.includes(i)}">${n.slice(0, 2)}</button>`).join('');
+  $('#setWorkdays').innerHTML = WEEK_ORDER.map(i => `<button type="button" data-day="${i}" aria-pressed="${st.workdays.includes(i)}" aria-label="${DAY_NAMES[i]}">${DAY_NAMES[i].slice(0, 2)}</button>`).join('');
+  const nDays = st.workdays.length;
+  $('#workdaysNote').textContent = `${plural(nDays, 'day')} a week × ${fmtDur(st.target)} = ${fmtDur(nDays * st.target)} a week, ${fmtDur(2 * nDays * st.target)} every 2 weeks. Hours on other days count as extra.`;
   const short = m => fmtClock(m).replace(/ [AP]M/, '');
   $('#inRoundNote').textContent = `Up: ${[577, 659, 661].map(m => `${short(m)}→${short(roundIn(m))}`).join(', ')}`;
   $('#limitsNote').textContent = `Fingerprint before ${fmtClock(st.earliest)} counts as ${fmtClock(st.earliest)}; after ${fmtClock(st.latestOut)} counts as ${fmtClock(st.latestOut)}.`;
-  const off = st.weekend.map(d => DAY_NAMES[d]).join(', ') || 'none';
   $('#rulesList').innerHTML = `
     <li>Check-in rounds <b>up</b> to the next ${st.step} min (9:37 → 9:45). Before ${fmtClock(st.earliest)} counts as ${fmtClock(st.earliest)}. Latest check-in ${fmtClock(st.latest)}.</li>
     <li>Check-out ${{ down: 'rounds down', exact: 'uses the exact minute', nearest: 'rounds to the nearest', up: 'rounds up' }[st.outRound]}${st.outRound === 'exact' ? '' : ` to ${st.step} min`}. After ${fmtClock(st.latestOut)} counts as ${fmtClock(st.latestOut)}.</li>
-    <li>Every workday needs ${fmtDur(st.target)}, and at least ${fmtDur(st.minimum)} on a normal day. Day off: ${off} — hours then count as extra.</li>
+    <li>Each attendance day (${daysText()}) needs ${fmtDur(st.target)}, with at least ${fmtDur(st.minimum)} on the day. Hours on any other day count as extra.</li>
     <li>A half day adds ${fmtDur(halfCredit())}; a holiday adds ${fmtDur(st.target)}.</li>
-    <li>Period target = ${fmtDur(st.target)} × every workday from day ${st.periodStart} to day ${st.periodStart === 1 ? 'end of month' : st.periodStart - 1 + ' of next month'}, counted from your first logged day. A workday with nothing logged counts as 0h.</li>
+    <li>Period target = ${fmtDur(st.target)} × your attendance days from day ${st.periodStart} to day ${st.periodStart === 1 ? 'end of month' : st.periodStart - 1 + ' of next month'} (e.g. ${plural(2 * st.workdays.length, 'day')} in 2 weeks = ${fmtDur(2 * st.workdays.length * st.target)}), counted from your first logged day. An attendance day with nothing logged counts as 0h.</li>
     <li>Short days become debt; longer days pay it back within the same period.</li>`;
 }
 
@@ -821,11 +831,12 @@ dlgSettings.addEventListener('change', e => {
   else return;
   save(); fillSettings(); render();
 });
-$('#setWeekend').addEventListener('click', e => {
+$('#setWorkdays').addEventListener('click', e => {
   const b = e.target.closest('[data-day]'); if (!b) return;
-  const d = Number(b.dataset.day), w = new Set(S().weekend);
-  w.has(d) ? w.delete(d) : w.add(d);
-  state.settings.weekend = [...w].sort();
+  const d = Number(b.dataset.day), w = new Set(S().workdays);
+  if (w.has(d)) { if (w.size === 1) { toast('Keep at least one attendance day'); return; } w.delete(d); }
+  else w.add(d);
+  state.settings.workdays = [...w].sort();
   save(); fillSettings(); render();
 });
 
