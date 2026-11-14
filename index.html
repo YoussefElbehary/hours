@@ -22,7 +22,7 @@
   --good:#15803d; --good-soft:rgba(22,163,74,.12);
   --bad:#c42b2b; --bad-soft:rgba(220,38,38,.10);
   --warn:#a35208; --warn-soft:rgba(217,119,6,.13);
-  --chip:#eff0f4; --track:#e6e6ee;
+  --chip:#eff0f4; --track:#e6e6ee; --seg-on:#fff;
 }
 @media (prefers-color-scheme: dark){
   :root{
@@ -31,7 +31,7 @@
     --good:#4ade80; --good-soft:rgba(74,222,128,.13);
     --bad:#f87171; --bad-soft:rgba(248,113,113,.14);
     --warn:#fbbf24; --warn-soft:rgba(251,191,36,.14);
-    --chip:#2c2c2e; --track:#2c2c2e;
+    --chip:#2c2c2e; --track:#2c2c2e; --seg-on:#48484c;
   }
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -61,6 +61,9 @@ main{max-width:560px;margin:0 auto;padding:2px 14px 48px}
 .primary:active{filter:brightness(.88)}
 .primary small{display:block;font-weight:500;font-size:13px;opacity:.85}
 .ghost{display:block;width:100%;margin-top:6px;padding:10px;color:var(--accent);font-weight:560;font-size:15px}
+.quick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.quick button{padding:12px;border-radius:12px;background:var(--chip);color:var(--accent);font-weight:620;font-size:15px}
+.quick button:active{filter:brightness(.92)}
 .pills{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:12px}
 .pill{font-size:13px;padding:5px 11px;border-radius:999px;background:var(--chip);color:var(--muted);font-weight:560}
 .good-t{color:var(--good)} .bad-t{color:var(--bad)} .warn-t{color:var(--warn)}
@@ -72,7 +75,7 @@ main{max-width:560px;margin:0 auto;padding:2px 14px 48px}
 .progress{position:relative;height:10px;background:var(--track);border-radius:99px;margin:16px 0 6px}
 .progress .fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .4s}
 .progress .mark{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:var(--text);opacity:.35;border-radius:2px}
-.progress-legend{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+.progress-legend{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted)}
 
 .inout{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
 .inout div{background:var(--chip);border-radius:12px;padding:10px 12px}
@@ -89,6 +92,7 @@ main{max-width:560px;margin:0 auto;padding:2px 14px 48px}
 .leave-row .t{font-weight:680;font-size:19px}
 .leave-row .st{font-size:13px;min-width:74px;text-align:right;color:var(--muted)}
 .leave-row.reached .t,.leave-row.reached .st{color:var(--good)}
+.leave-row.capped .t,.leave-row.capped .st{color:var(--warn)}
 
 .period-nav{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .period-nav .title{text-align:center;flex:1}
@@ -99,6 +103,7 @@ main{max-width:560px;margin:0 auto;padding:2px 14px 48px}
 .stat{background:var(--chip);border-radius:12px;padding:10px 6px;text-align:center}
 .stat b{display:block;font-size:17px}
 .stat span{font-size:12px;color:var(--muted)}
+.breakdown{text-align:center;font-size:13.5px;color:var(--muted);margin-top:10px}
 .hint{margin-top:12px;font-size:14.5px;padding:11px 13px;border-radius:12px;background:var(--accent-soft)}
 
 .section-head{display:flex;justify-content:space-between;align-items:center;margin:22px 6px 8px}
@@ -134,6 +139,7 @@ dialog::backdrop{background:rgba(0,0,0,.42)}
 .sheet-head .cancel{text-align:left}
 .group-title{margin:18px 14px 6px;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
 .group-note{margin:6px 14px 0;font-size:13px;color:var(--muted)}
+.group-note:empty{display:none}
 .group{background:var(--card);border-radius:14px;overflow:hidden}
 .field{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 14px;min-height:50px;border-bottom:1px solid var(--line);width:100%;text-align:left;font-size:16px}
 .field:last-child{border-bottom:0}
@@ -143,13 +149,16 @@ dialog::backdrop{background:rgba(0,0,0,.42)}
 .field input[type=checkbox]{width:24px;height:24px;accent-color:var(--btn);flex:none}
 .field.btn{color:var(--accent);min-height:48px}
 .field.btn.danger{color:var(--bad)}
-.field.col{flex-direction:column;align-items:stretch}
+.field.col{flex-direction:column;align-items:stretch;gap:8px;padding:10px 14px}
 .inline{display:flex;align-items:center;gap:6px}
 .clear{width:30px;height:30px;border-radius:50%;background:var(--chip);color:var(--muted);font-size:14px}
+.seg{display:flex;background:var(--chip);border-radius:10px;padding:3px;gap:3px}
+.seg button{flex:1;padding:8px 4px;border-radius:8px;font-size:15px;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed=true]{background:var(--seg-on);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.14)}
 .days{display:flex;gap:6px;justify-content:space-between;padding:2px 0 4px}
 .days button{flex:1;height:38px;border-radius:10px;background:var(--chip);font-size:14px;font-weight:600;color:var(--muted)}
 .days button[aria-pressed=true]{background:var(--btn);color:#fff}
-.preview{margin:12px 2px 0;padding:12px 14px;border-radius:14px;background:var(--card);font-size:15px}
+.preview{margin:12px 2px 0;padding:12px 14px;border-radius:14px;background:var(--card);font-size:15px;line-height:1.5}
 .preview .err{color:var(--bad);font-weight:600}
 .delete{display:block;width:100%;margin-top:14px;padding:14px;border-radius:14px;background:var(--card);color:var(--bad);font-weight:600}
 .rules{margin:0;padding:12px 16px 12px 32px;font-size:14px;color:var(--muted)}
@@ -185,12 +194,19 @@ dialog::backdrop{background:rgba(0,0,0,.42)}
     </div>
     <div class="group">
       <label class="field"><span>Date</span><input type="date" name="date" required></label>
-      <label class="field"><span>Check-in</span><input type="time" name="in" required></label>
-      <div class="field"><span>Check-out</span>
+      <div class="field col"><span>Day type</span>
+        <div class="seg" id="typeSeg">
+          <button type="button" data-type="work">Work</button>
+          <button type="button" data-type="half">Half day</button>
+          <button type="button" data-type="leave">Holiday</button>
+        </div>
+      </div>
+      <label class="field" data-times><span>Check-in</span><input type="time" name="in"></label>
+      <div class="field" data-times><span>Check-out</span>
         <span class="inline"><input type="time" name="out" aria-label="Check-out"><button type="button" class="clear" id="btnClearOut" aria-label="Clear check-out">✕</button></span>
       </div>
-      <label class="field"><span>Day off — extra hours only<br><small class="muted">No 7h requirement for this day</small></span><input type="checkbox" name="extra"></label>
     </div>
+    <p class="group-note" id="typeNote"></p>
     <div class="preview" id="editPreview"></div>
     <button type="button" class="delete" id="btnDelete">Delete this day</button>
   </form>
@@ -205,8 +221,11 @@ dialog::backdrop{background:rgba(0,0,0,.42)}
     <div class="group">
       <label class="field"><span>Required per day</span><span class="inline"><input type="number" id="setTarget" min="0.25" max="24" step="0.25" inputmode="decimal"> h</span></label>
       <label class="field"><span>Minimum per day</span><span class="inline"><input type="number" id="setMinimum" min="0" max="24" step="0.25" inputmode="decimal"> h</span></label>
+      <label class="field"><span>Earliest counted check-in</span><input type="time" id="setEarliest"></label>
       <label class="field"><span>Latest check-in</span><input type="time" id="setLatest"></label>
+      <label class="field"><span>Latest counted check-out</span><input type="time" id="setLatestOut"></label>
     </div>
+    <p class="group-note" id="limitsNote"></p>
 
     <p class="group-title">Rounding</p>
     <div class="group">
@@ -252,9 +271,11 @@ dialog::backdrop{background:rgba(0,0,0,.42)}
 /* ---------- storage ---------- */
 const KEY = 'fphours.v1';
 const DEFAULTS = {
-  target: 420,        // required minutes per day (7h)
-  minimum: 240,       // minimum minutes per day (4h)
-  latest: 720,        // latest check-in, minutes after midnight (12:00)
+  target: 420,        // required minutes per workday (7h)
+  minimum: 240,       // minimum minutes on a normal workday (4h)
+  earliest: 480,      // fingerprint before this counts as this (8:00)
+  latest: 720,        // latest allowed check-in (12:00)
+  latestOut: 1140,    // fingerprint after this counts as this (19:00)
   step: 15,           // rounding step in minutes
   outRound: 'down',   // check-out rounding: down | exact | nearest | up
   periodStart: 16,    // period runs from this day to the day before it next month
@@ -283,6 +304,7 @@ const nowMin = () => { const d = new Date(); return d.getHours() * 60 + d.getMin
 const todayKey = () => keyOf(new Date());
 const addDays = (k, n) => { const d = dateOf(k); d.setDate(d.getDate() + n); return keyOf(d); };
 const S = () => state.settings;
+const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
 
 function fmtClock(min) {
   if (min == null) return '—';
@@ -302,6 +324,7 @@ function fmtDur(min, signed) {
   if (!h) return `${sign}${m}m`;
   return m ? `${sign}${h}h ${pad(m)}m` : `${sign}${h}h`;
 }
+const fmtDiff = n => n === 0 ? '±0' : fmtDur(n, true);
 const fmtDate = (k, opts) => dateOf(k).toLocaleDateString('en-GB', opts);
 const cls = n => n > 0 ? 'good' : n < 0 ? 'bad' : '';
 
@@ -319,6 +342,10 @@ function roundOut(m) {
     default: return floorTo(m, s);
   }
 }
+// Fingerprint before 8:00 counts as 8:00; after 19:00 counts as 19:00
+const clampIn = m => Math.max(roundIn(m), S().earliest);
+const clampOut = m => Math.min(roundOut(m), S().latestOut);
+const halfCredit = () => Math.round(S().target / 2);
 // Earliest real clock time you can leave so that your counted check-out is >= X
 function earliestOut(X) {
   const s = S().step, R = ceilTo(X, s);
@@ -330,27 +357,37 @@ function earliestOut(X) {
   }
 }
 const isWeekend = k => S().weekend.includes(dateOf(k).getDay());
-const isExtra = (k, rec) => rec && typeof rec.extra === 'boolean' ? rec.extra : isWeekend(k);
+const typeOf = rec => rec && (rec.type === 'leave' || rec.type === 'half') ? rec.type : 'work';
 
+// One day: what it requires, what it earns (fingerprint hours + half-day/holiday credit)
 function analyze(k, rec, liveNow) {
-  if (!rec || !rec.in) return null;
-  const st = S();
-  const a = { key: k, rec, extra: isExtra(k, rec) };
-  a.inRaw = toMin(rec.in);
-  a.inR = roundIn(a.inRaw);
-  a.required = a.extra ? 0 : st.target;
-  a.late = !a.extra && a.inRaw > st.latest;
-  if (rec.out) {
-    a.outRaw = toMin(rec.out);
-    a.outR = roundOut(a.outRaw);
-    a.done = true;
-    a.worked = Math.max(0, a.outR - a.inR);
-  } else {
-    a.done = false;
-    a.worked = liveNow != null ? Math.max(0, roundOut(liveNow) - a.inR) : 0;
+  if (!rec) return null;
+  const st = S(), type = typeOf(rec);
+  if (type === 'work' && !rec.in) return null;
+  const workday = !isWeekend(k);
+  const a = {
+    key: k, rec, type, workday,
+    required: workday ? st.target : 0,
+    credit: !workday ? 0 : type === 'leave' ? st.target : type === 'half' ? halfCredit() : 0,
+    worked: 0, late: false, open: false
+  };
+  if (type !== 'leave' && rec.in) {
+    a.inRaw = toMin(rec.in);
+    a.inR = clampIn(a.inRaw);
+    a.late = workday && type === 'work' && a.inRaw > st.latest;
+    if (rec.out) {
+      a.outRaw = toMin(rec.out);
+      a.outR = clampOut(a.outRaw);
+      a.worked = Math.max(0, a.outR - a.inR);
+    } else {
+      a.open = true;
+      if (liveNow != null) a.worked = Math.max(0, clampOut(liveNow) - a.inR);
+    }
   }
-  a.diff = a.worked - a.required;
-  a.underMin = a.done && !a.extra && a.worked < st.minimum;
+  a.done = !a.open;
+  a.total = a.worked + a.credit;
+  a.diff = a.total - a.required;
+  a.underMin = a.done && workday && type === 'work' && a.worked < st.minimum;
   return a;
 }
 
@@ -362,31 +399,49 @@ function periodByOffset(off) {
   return { start: keyOf(new Date(y, m, st)), end: keyOf(new Date(y, m + 1, st - 1)) };
 }
 
+const firstLogged = () => Object.keys(state.days).sort()[0];
+
+// Period totals. Every workday (not a day off) from the first logged day on needs `target`;
+// past workdays with nothing logged count as 0h. Today counts once it's finished.
 function summarize(p) {
-  const tk = todayKey();
-  const keys = Object.keys(state.days).filter(k => k >= p.start && k <= p.end).sort();
-  const sum = { worked: 0, required: 0, days: 0, under: 0, late: 0, missing: 0, list: [] };
-  for (const k of keys) {
-    const a = analyze(k, state.days[k], k === tk ? nowMin() : null);
-    if (!a) continue;
-    sum.list.push(a);
-    if (a.done) {
-      sum.worked += a.worked; sum.required += a.required; sum.days++;
+  const st = S(), tk = todayKey(), first = firstLogged();
+  const sum = { worked: 0, credit: 0, required: 0, target: 0, leaveDays: 0, halfDays: 0,
+                under: 0, late: 0, missing: 0, unlogged: 0, list: [] };
+  if (first) {
+    const from = first > p.start ? first : p.start;
+    for (let k = p.start; k <= p.end; k = addDays(k, 1)) {
+      const workday = !isWeekend(k), tracked = k >= from;
+      if (tracked && workday) sum.target += st.target;
+      if (k > tk) continue;
+      const a = analyze(k, state.days[k], k === tk ? nowMin() : null);
+      if (!a) {
+        if (tracked && workday && k < tk) {
+          sum.required += st.target; sum.unlogged++;
+          sum.list.push({ key: k, unlogged: true });
+        }
+        continue;
+      }
+      sum.list.push(a);
+      if (a.late) sum.late++;
+      if (k === tk && a.open) continue;            // today still running: not counted yet
+      sum.required += a.required; sum.worked += a.worked; sum.credit += a.credit;
+      if (a.type === 'leave' && a.workday) sum.leaveDays++;
+      if (a.type === 'half' && a.workday) sum.halfDays++;
       if (a.underMin) sum.under++;
-    } else if (k !== tk) sum.missing++;
-    if (a.late) sum.late++;
+      if (a.open) sum.missing++;                    // past day without check-out
+    }
   }
-  sum.balance = sum.worked - sum.required;   // finished days only (today counts once checked out)
+  sum.total = sum.worked + sum.credit;
+  sum.balance = sum.total - sum.required;
   return sum;
 }
 
 function workdaysLeft(p) {
-  const tk = todayKey();
+  const tk = todayKey(), today = analyze(tk, state.days[tk]);
   let n = 0;
   for (let k = tk; k <= p.end; k = addDays(k, 1)) {
     if (isWeekend(k)) continue;
-    const rec = state.days[k];
-    if (k === tk && rec && rec.out) continue; // today already finished
+    if (k === tk && today && today.done) continue; // today already finished
     n++;
   }
   return n;
@@ -397,113 +452,155 @@ let viewOffset = 0;
 
 function renderToday() {
   const el = $('#today'), st = S(), tk = todayKey(), now = nowMin(), rec = state.days[tk];
+  const workday = !isWeekend(tk), type = typeOf(rec);
   const head = `<div class="card-head"><span class="eyebrow">Today</span><span class="muted">${fmtDate(tk, { weekday: 'long', day: 'numeric', month: 'long' })}</span></div>`;
 
-  // Not checked in yet
+  // Holiday
+  if (rec && type === 'leave') {
+    el.innerHTML = `${head}
+      <div class="center" style="margin-top:12px">
+        <div class="big">Holiday</div>
+        <div class="sub">counts as <b>${fmtDur(workday ? st.target : 0)}</b> today</div>
+      </div>
+      <button class="ghost" data-edit="${tk}">Change</button>`;
+    return;
+  }
+
+  // Not checked in yet (nothing logged, or half day without fingerprint)
   if (!rec || !rec.in) {
-    const left = st.latest - now, off = isWeekend(tk);
+    const half = type === 'half', pills = [];
+    if (half) pills.push(`<span class="pill accent">Half day · ${fmtDur(halfCredit())} credited</span>`);
+    if (!workday) pills.push(`<span class="pill accent">${fmtDate(tk, { weekday: 'long' })} — day off, hours count as extra</span>`);
+    else if (now < st.earliest) pills.push(`<span class="pill">Counting starts at ${fmtClock(st.earliest)}</span>`);
+    else if (now >= st.latestOut) pills.push(`<span class="pill bad">After ${fmtClock(st.latestOut)} — nothing counts now</span>`);
+    else if (!half) {
+      const left = st.latest - now;
+      pills.push(left >= 0
+        ? `<span class="pill ${left <= 30 ? 'warn' : 'good'}">Latest check-in ${fmtClock(st.latest)} · ${fmtDur(left)} left</span>`
+        : `<span class="pill bad">Past the ${fmtClock(st.latest)} check-in limit</span>`);
+    }
     el.innerHTML = `${head}
       <div class="center" style="margin-top:12px">
         <div class="big">${fmtClock(now)}</div>
-        <div class="sub">Check in now → counts as <b>${fmtClock(roundIn(now))}</b></div>
-        <div class="pills">
-          ${off ? '<span class="pill accent">Day off — hours count as extra</span>'
-            : left >= 0 ? `<span class="pill ${left <= 30 ? 'warn' : 'good'}">Latest check-in ${fmtClock(st.latest)} · ${fmtDur(left)} left</span>`
-            : `<span class="pill bad">Past the ${fmtClock(st.latest)} check-in limit</span>`}
-        </div>
+        <div class="sub">Check in now → counts as <b>${fmtClock(clampIn(now))}</b></div>
+        ${half ? `<div class="sub">Work ${fmtDur(st.target - halfCredit())} more to complete today, or skip it.</div>` : ''}
+        <div class="pills">${pills.join('')}</div>
       </div>
       <button class="primary" data-act="checkin">Check in now</button>
-      <button class="ghost" data-act="edit-today">Enter a different time</button>`;
+      ${!rec && workday ? `<div class="quick"><button data-act="mark-half">Half day</button><button data-act="mark-leave">Holiday</button></div>` : ''}
+      ${rec ? `<button class="ghost" data-edit="${tk}">Change</button>` : `<button class="ghost" data-act="edit-today">Enter a different time</button>`}`;
     return;
   }
 
   const a = analyze(tk, rec, now);
 
   // Checked in, still at work
-  if (!a.done) {
+  if (a.open) {
     const prior = summarize(periodByOffset(0)).balance; // today is excluded while open
+    const needFull = Math.max(0, a.required - a.credit);
+    const minNeed = a.workday && a.type === 'work' ? st.minimum : 0;
     const items = [];
-    if (!a.extra) {
-      items.push({ lbl: 'Minimum', sub: fmtDur(st.minimum), need: st.minimum });
-      items.push({ lbl: 'Full day', sub: fmtDur(st.target), need: st.target });
-      const even = Math.max(st.minimum, st.target - prior);
-      if (even !== st.target && even !== st.minimum)
-        items.push({ lbl: prior < 0 ? 'Clear period debt' : 'Use your surplus',
-                     sub: `${fmtDur(even)} today · balance now ${fmtDur(prior, true)}`, need: even });
-    } else if (prior < 0) {
-      items.push({ lbl: 'Clear period debt', sub: `${fmtDur(-prior)} extra`, need: -prior });
-    }
+    if (minNeed) items.push({ lbl: 'Minimum', sub: fmtDur(minNeed), need: minNeed });
+    if (needFull) items.push({ lbl: a.type === 'half' ? 'Complete the day' : 'Full day',
+      sub: a.type === 'half' ? `${fmtDur(needFull)} + ${fmtDur(a.credit)} half-day` : fmtDur(needFull), need: needFull });
+    const even = Math.max(minNeed, needFull - prior);
+    if (even > 0 && even !== needFull && even !== minNeed)
+      items.push({ lbl: prior < 0 ? 'Clear period debt' : 'Use your surplus',
+                   sub: `${fmtDur(even)} today · balance now ${fmtDur(prior, true)}`, need: even });
+    const maxWork = Math.max(0, st.latestOut - a.inR);
     const rows = items.map(it => {
-      const t = earliestOut(a.inR + it.need), reached = now >= t;
-      return `<div class="leave-row ${reached ? 'reached' : ''}">
-        <div class="lbl">${it.lbl}<small>${it.sub}</small></div>
+      const tRaw = earliestOut(a.inR + it.need), capped = tRaw > st.latestOut;
+      const t = capped ? st.latestOut : tRaw, reached = !capped && now >= t;
+      const status = capped ? 'max today' : reached ? '✓ reached' : 'in ' + fmtDur(t - now);
+      const sub = capped ? `needs ${fmtDur(it.need)} · only ${fmtDur(maxWork)} possible today` : it.sub;
+      return `<div class="leave-row ${reached ? 'reached' : ''} ${capped ? 'capped' : ''}">
+        <div class="lbl">${it.lbl}<small>${sub}</small></div>
         <div class="t">${fmtClock(t)}</div>
-        <div class="st">${reached ? '✓ reached' : 'in ' + fmtDur(t - now)}</div></div>`;
+        <div class="st">${status}</div></div>`;
     }).join('');
-    const pct = a.extra ? 100 : Math.min(100, a.worked / st.target * 100);
-    const markPct = Math.min(100, st.minimum / st.target * 100);
+    const pills = [];
+    if (a.late) pills.push(`<span class="pill bad">Checked in after ${fmtClock(st.latest)}</span>`);
+    if (a.inRaw < st.earliest) pills.push(`<span class="pill">Counted from ${fmtClock(st.earliest)}</span>`);
+    if (now >= st.latestOut) pills.push(`<span class="pill warn">Counting stopped at ${fmtClock(st.latestOut)}</span>`);
+    let progress = '';
+    if (a.workday) {
+      const pct = Math.min(100, a.total / a.required * 100);
+      const left = minNeed ? (a.worked >= minNeed ? '✓ minimum done' : `${fmtDur(minNeed - a.worked)} to minimum`)
+                           : a.credit ? `incl. ${fmtDur(a.credit)} half-day` : '';
+      const right = a.total >= a.required ? '✓ full day' : `${fmtDur(a.required - a.total)} to full day`;
+      progress = `<div class="progress"><div class="fill" style="width:${pct}%"></div>${minNeed ? `<div class="mark" style="left:${Math.min(100, minNeed / a.required * 100)}%"></div>` : ''}</div>
+        <div class="progress-legend"><span>${left}</span><span>${right}</span></div>`;
+    }
     el.innerHTML = `${head}
       <div class="center" style="margin-top:12px">
         <div class="big">${fmtDur(a.worked)}</div>
-        <div class="sub">counted so far${a.extra ? ' · day off, all extra' : ` of ${fmtDur(st.target)}`}</div>
+        <div class="sub">worked so far${a.credit ? ` + ${fmtDur(a.credit)} half-day` : ''}${a.workday ? '' : ' · day off, all extra'}</div>
       </div>
-      ${a.extra ? '' : `<div class="progress"><div class="fill" style="width:${pct}%"></div><div class="mark" style="left:${markPct}%"></div></div>
-      <div class="progress-legend"><span>${a.worked >= st.minimum ? '✓ minimum done' : fmtDur(st.minimum - a.worked) + ' to minimum'}</span><span>${a.worked >= st.target ? '✓ full day' : fmtDur(st.target - a.worked) + ' to full day'}</span></div>`}
+      ${progress}
       <div class="inout">
-        <div><span>In</span><b>${fmtClock(a.inR)}</b> <small>(${fmtClock(a.inRaw)})</small></div>
-        <div><span>Leave now</span><b>${fmtClock(roundOut(now))}</b> <small>(${fmtClock(now)})</small></div>
+        <div><span>In</span><b>${fmtClock(a.inR)}</b><small>clock ${fmtClock(a.inRaw)}</small></div>
+        <div><span>Leave now</span><b>${fmtClock(clampOut(now))}</b><small>clock ${fmtClock(now)}</small></div>
       </div>
-      ${a.late ? `<div class="pills"><span class="pill bad">Checked in after ${fmtClock(st.latest)}</span></div>` : ''}
+      ${pills.length ? `<div class="pills">${pills.join('')}</div>` : ''}
       ${rows ? `<div class="leave"><h3>Leave at</h3>${rows}</div>` : ''}
-      <button class="primary" data-act="checkout">Check out now<small>counts as ${fmtClock(roundOut(now))}</small></button>
+      <button class="primary" data-act="checkout">Check out now<small>counts as ${fmtClock(clampOut(now))}</small></button>
       <button class="ghost" data-edit="${tk}">Edit times</button>`;
     return;
   }
 
   // Finished for today
   const pills = [];
-  if (a.extra) pills.push('<span class="pill accent">Day off — all extra</span>');
+  if (!a.workday) pills.push('<span class="pill accent">Day off — all extra</span>');
+  if (a.type === 'half') pills.push(`<span class="pill accent">incl. ${fmtDur(a.credit)} half-day</span>`);
   if (a.underMin) pills.push(`<span class="pill bad">Below ${fmtDur(st.minimum)} minimum</span>`);
   if (a.late) pills.push(`<span class="pill bad">Checked in after ${fmtClock(st.latest)}</span>`);
-  if (!a.extra && !a.underMin) pills.push(a.diff >= 0 ? '<span class="pill good">✓ Full day</span>' : `<span class="pill warn">${fmtDur(-a.diff)} added to your debt</span>`);
+  if (a.workday && !a.underMin) pills.push(a.diff >= 0 ? '<span class="pill good">✓ Full day</span>' : `<span class="pill warn">${fmtDur(-a.diff)} added to your debt</span>`);
   el.innerHTML = `${head}
     <div class="center" style="margin-top:12px">
-      <div class="big">${fmtDur(a.worked)}</div>
-      <div class="sub">counted today · <b class="${cls(a.diff)}-t">${fmtDur(a.diff, true)}</b> vs ${fmtDur(a.required)}</div>
+      <div class="big">${fmtDur(a.total)}</div>
+      <div class="sub">${a.workday ? `counted today · <b class="${cls(a.diff)}-t">${fmtDiff(a.diff)}</b> vs ${fmtDur(a.required)}` : 'extra hours today'}</div>
     </div>
     <div class="inout">
-      <div><span>In</span><b>${fmtClock(a.inR)}</b> <small>(${fmtClock(a.inRaw)})</small></div>
-      <div><span>Out</span><b>${fmtClock(a.outR)}</b> <small>(${fmtClock(a.outRaw)})</small></div>
+      <div><span>In</span><b>${fmtClock(a.inR)}</b><small>clock ${fmtClock(a.inRaw)}</small></div>
+      <div><span>Out</span><b>${fmtClock(a.outR)}</b><small>clock ${fmtClock(a.outRaw)}</small></div>
     </div>
     <div class="pills">${pills.join('')}</div>
     <button class="ghost" data-edit="${tk}">Edit times</button>`;
 }
 
 function renderPeriod() {
-  const st = S(), p = periodByOffset(viewOffset), sum = summarize(p), cur = viewOffset === 0;
+  const st = S(), p = periodByOffset(viewOffset), sum = summarize(p), cur = viewOffset === 0, tk = todayKey();
   const startTxt = fmtDate(p.start, { day: 'numeric', month: 'short' });
   const endTxt = fmtDate(p.end, { day: 'numeric', month: 'short', year: 'numeric' });
-  const b = sum.balance;
+  const b = sum.balance, hasData = !!firstLogged();
+  const todayRec = state.days[tk], todayOpen = cur && todayRec && todayRec.in && !todayRec.out;
 
   let hint = '';
-  if (cur) {
-    const n = workdaysLeft(p);
+  if (!hasData) hint = 'Check in to start. The period target counts from your first logged day.';
+  else if (cur) {
+    const n = workdaysLeft(p), maxDay = st.latestOut - st.earliest;
     if (b < 0 && n > 0) {
       const avg = ceilTo(st.target + (-b) / n, 5);
-      hint = `To clear <b>${fmtDur(-b)}</b> over the <b>${n}</b> workday${n > 1 ? 's' : ''} left, average about <b>${fmtDur(avg)}</b> a day — or add it in one go.`;
+      hint = avg <= maxDay
+        ? `To clear <b>${fmtDur(-b)}</b> over the <b>${plural(n, 'workday')}</b> left, average about <b>${fmtDur(avg)}</b> a day.`
+        : `Even ${fmtClock(st.earliest)}–${fmtClock(st.latestOut)} every remaining workday leaves about <b>${fmtDur(-b - n * (maxDay - st.target))}</b> short.`;
     } else if (b < 0) {
       hint = `No workdays left in this period to make up <b>${fmtDur(-b)}</b>.`;
     } else if (b > 0 && n > 0) {
       const avg = Math.max(st.minimum, floorTo(st.target - b / n, 5));
-      hint = `You're <b>${fmtDur(b)}</b> ahead. You could average <b>${fmtDur(avg)}</b> a day over the <b>${n}</b> workday${n > 1 ? 's' : ''} left.`;
+      hint = `You're <b>${fmtDur(b)}</b> ahead. You could average <b>${fmtDur(avg)}</b> a day over the <b>${plural(n, 'workday')}</b> left.`;
     } else if (n > 0) {
-      hint = `On track. ${fmtDur(st.target)} a day keeps you even — ${n} workday${n > 1 ? 's' : ''} left.`;
+      hint = `On track. ${fmtDur(st.target)} a day keeps you even — ${plural(n, 'workday')} left.`;
     }
   }
   const flags = [];
-  if (sum.under) flags.push(`<span class="pill bad">${sum.under} day${sum.under > 1 ? 's' : ''} below ${fmtDur(st.minimum)}</span>`);
-  if (sum.late) flags.push(`<span class="pill bad">${sum.late} late check-in${sum.late > 1 ? 's' : ''}</span>`);
-  if (sum.missing) flags.push(`<span class="pill warn">${sum.missing} missing check-out${sum.missing > 1 ? 's' : ''}</span>`);
+  if (sum.unlogged) flags.push(`<span class="pill warn">${plural(sum.unlogged, 'workday')} not logged</span>`);
+  if (sum.missing) flags.push(`<span class="pill warn">${plural(sum.missing, 'missing check-out')}</span>`);
+  if (sum.under) flags.push(`<span class="pill bad">${plural(sum.under, 'day')} below ${fmtDur(st.minimum)}</span>`);
+  if (sum.late) flags.push(`<span class="pill bad">${plural(sum.late, 'late check-in')}</span>`);
+  const breakdown = [`Worked ${fmtDur(sum.worked)}`];
+  if (sum.leaveDays) breakdown.push(plural(sum.leaveDays, 'holiday'));
+  if (sum.halfDays) breakdown.push(plural(sum.halfDays, 'half day'));
 
   $('#period').innerHTML = `
     <div class="period-nav">
@@ -513,34 +610,41 @@ function renderPeriod() {
     </div>
     <div class="balance">
       <div class="big ${cls(b)}-t">${b === 0 ? '0h' : fmtDur(b, true)}</div>
-      <div class="sub">${b < 0 ? 'to make up' : b > 0 ? 'extra hours' : 'balance'}${cur && state.days[todayKey()] && !state.days[todayKey()].out ? ' · today not included yet' : ''}</div>
+      <div class="sub">${b < 0 ? 'behind' : b > 0 ? 'ahead' : 'on track'}${cur ? ' so far' : ''}${todayOpen ? ' · today not included yet' : ''}</div>
     </div>
     <div class="stats">
-      <div class="stat"><b>${fmtDur(sum.worked)}</b><span>worked</span></div>
-      <div class="stat"><b>${fmtDur(sum.required)}</b><span>required</span></div>
-      <div class="stat"><b>${sum.days}</b><span>day${sum.days === 1 ? '' : 's'}</span></div>
+      <div class="stat"><b>${fmtDur(sum.total)}</b><span>done</span></div>
+      <div class="stat"><b>${fmtDur(sum.target)}</b><span>period target</span></div>
+      <div class="stat"><b>${fmtDur(Math.max(0, sum.target - sum.total))}</b><span>left</span></div>
     </div>
+    ${hasData ? `<div class="breakdown">${breakdown.join(' · ')}</div>` : ''}
     ${flags.length ? `<div class="pills">${flags.join('')}</div>` : ''}
     ${hint ? `<div class="hint">${hint}</div>` : ''}`;
 
   // day list
-  const tk = todayKey();
   const rows = sum.list.slice().reverse().map(a => {
     const d = dateOf(a.key);
+    const dateCol = `<div class="row-date"><b>${d.getDate()}</b><span>${fmtDate(a.key, { weekday: 'short' })}</span></div>`;
+    if (a.unlogged) return `<button class="row" data-edit="${a.key}">${dateCol}
+      <div class="row-main"><div class="times warn-t">Not logged</div><div class="row-sub">Tap to add times, holiday or half day</div></div>
+      <div class="row-right"><b>0h</b><span class="chip bad">${fmtDiff(-st.target)}</span></div></button>`;
     const flagsTxt = [];
+    if (!a.workday) flagsTxt.push('<span class="flag" style="color:var(--accent)">day off</span>');
     if (a.late) flagsTxt.push('<span class="flag bad-t">late</span>');
     if (a.underMin) flagsTxt.push(`<span class="flag bad-t">&lt; ${fmtDur(st.minimum)}</span>`);
-    if (a.extra) flagsTxt.push('<span class="flag" style="color:var(--accent)">day off</span>');
+    let main, sub;
+    const times = a.inR != null ? `${fmtClock(a.inR)} – ${a.open ? '…' : fmtClock(a.outR)}` : '';
+    const clock = a.inR != null ? `clock ${fmtClock(a.inRaw)}${a.open ? '' : ' → ' + fmtClock(a.outRaw)}` : '';
+    if (a.type === 'leave') { main = 'Holiday'; sub = `counts as ${fmtDur(a.credit)}`; }
+    else if (a.type === 'half') { main = times ? `Half day · ${times}` : 'Half day'; sub = `${fmtDur(a.credit)} credited${clock ? ' · ' + clock : ''}`; }
+    else { main = times; sub = clock; }
     let right;
-    if (a.done) right = `<b>${fmtDur(a.worked)}</b><span class="chip ${cls(a.diff)}">${a.diff === 0 ? '±0' : fmtDur(a.diff, true)}</span>`;
-    else if (a.key === tk) right = `<b>${fmtDur(a.worked)}</b><span class="chip accent">at work</span>`;
-    else right = `<b>—</b><span class="chip warn">no check-out</span>`;
-    return `<button class="row" data-edit="${a.key}">
-      <div class="row-date"><b>${d.getDate()}</b><span>${fmtDate(a.key, { weekday: 'short' })}</span></div>
-      <div class="row-main">
-        <div class="times">${fmtClock(a.inR)} – ${a.done ? fmtClock(a.outR) : '…'}</div>
-        <div class="row-sub">${flagsTxt.join('')}${flagsTxt.length ? ' · ' : ''}clock ${fmtClock(a.inRaw)}${a.done ? ' → ' + fmtClock(a.outRaw) : ''}</div>
-      </div>
+    if (a.open && a.key === tk) right = `<b>${fmtDur(a.total)}</b><span class="chip accent">at work</span>`;
+    else if (a.open) right = `<b>${fmtDur(a.total)}</b><span class="chip warn">no check-out</span>`;
+    else right = `<b>${fmtDur(a.total)}</b><span class="chip ${cls(a.diff)}">${fmtDiff(a.diff)}</span>`;
+    return `<button class="row" data-edit="${a.key}">${dateCol}
+      <div class="row-main"><div class="times">${main}</div>
+        <div class="row-sub">${flagsTxt.join('')}${flagsTxt.length && sub ? ' · ' : ''}${sub}</div></div>
       <div class="row-right">${right}</div>
     </button>`;
   }).join('');
@@ -557,25 +661,41 @@ function toast(msg) {
 }
 
 function checkIn() {
-  const st = S(), tk = todayKey(), now = nowMin();
-  if (!isWeekend(tk) && now > st.latest && !confirm(`It's past ${fmtClock(st.latest)}, the latest check-in. Register anyway?`)) return;
-  state.days[tk] = { in: toHHMM(now) };
+  const st = S(), tk = todayKey(), now = nowMin(), rec = state.days[tk] || {};
+  if (!isWeekend(tk) && typeOf(rec) === 'work' && now > st.latest &&
+      !confirm(`It's past ${fmtClock(st.latest)}, the latest check-in. Register anyway?`)) return;
+  state.days[tk] = { ...rec, in: toHHMM(now) };
   save(); render();
-  toast(`Checked in ${fmtClock(now)} → counts as ${fmtClock(roundIn(now))}`);
+  toast(`Checked in ${fmtClock(now)} → counts as ${fmtClock(clampIn(now))}`);
 }
 function checkOut() {
   const st = S(), tk = todayKey(), rec = state.days[tk];
   if (!rec) return;
   const now = nowMin(), a = analyze(tk, { ...rec, out: toHHMM(now) });
-  if (!a.extra && a.worked < st.minimum && !confirm(`Only ${fmtDur(a.worked)} counted — below the ${fmtDur(st.minimum)} minimum. Check out anyway?`)) return;
+  if (a.workday && a.type === 'work' && a.worked < st.minimum &&
+      !confirm(`Only ${fmtDur(a.worked)} counted — below the ${fmtDur(st.minimum)} minimum. Check out anyway?`)) return;
   rec.out = toHHMM(now);
   save(); render();
-  toast(`Checked out · ${fmtDur(a.worked)} counted (${a.diff === 0 ? '±0' : fmtDur(a.diff, true)})`);
+  toast(`Checked out · ${fmtDur(a.total)} counted (${fmtDiff(a.diff)})`);
+}
+function markToday(type) {
+  state.days[todayKey()] = { type };
+  save(); render();
+  toast(type === 'leave' ? `Holiday — counts as ${fmtDur(S().target)}` : `Half day — ${fmtDur(halfCredit())} credited`);
 }
 
 /* ---------- edit dialog ---------- */
 const dlgEdit = $('#dlgEdit'), form = $('#formEdit');
-let editingKey = null, extraTouched = false;
+let editingKey = null, editType = 'work';
+
+function setType(t) {
+  editType = t;
+  $('#typeSeg').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.type === t)));
+  form.querySelectorAll('[data-times]').forEach(el => { el.hidden = t === 'leave'; });
+  $('#typeNote').textContent = t === 'half' ? `Adds ${fmtDur(halfCredit())}. Times are optional — add them if you also worked that day.`
+    : t === 'leave' ? `Counts as ${fmtDur(S().target)} — a full day.` : '';
+  updatePreview();
+}
 
 function openEditor(k) {
   const tk = todayKey();
@@ -588,54 +708,61 @@ function openEditor(k) {
   form.date.max = tk;
   form.in.value = rec.in || '';
   form.out.value = rec.out || '';
-  form.extra.checked = isExtra(date, rec.in ? rec : null);
-  extraTouched = editingKey ? typeof rec.extra === 'boolean' : false;
   $('#btnDelete').hidden = !editingKey;
-  updatePreview();
+  setType(typeOf(rec));
   dlgEdit.showModal();
 }
 
 function readForm() {
-  const date = form.date.value, inT = form.in.value, outT = form.out.value;
-  let err = '';
+  const date = form.date.value, inT = form.in.value, outT = form.out.value, t = editType;
+  let err = '', soft = false;
   if (!date) err = 'Pick a date.';
-  else if (!inT) err = 'Enter the check-in time.';
-  else if (outT && toMin(outT) <= toMin(inT)) err = 'Check-out must be after check-in.';
-  const rec = { in: inT };
-  if (outT) rec.out = outT;
-  if (date && form.extra.checked !== isWeekend(date)) rec.extra = form.extra.checked;
-  return { date, rec, err };
+  else if (date > todayKey()) err = "You can't log a day in the future.";
+  else if (t !== 'work' && isWeekend(date)) err = `${fmtDate(date, { weekday: 'long' })} is already a day off.`;
+  else if (t === 'work' && !inT) { err = 'Enter the check-in time.'; soft = true; }
+  else if (t === 'half' && outT && !inT) err = 'Add the check-in time too.';
+  else if (t !== 'leave' && inT && outT && toMin(outT) <= toMin(inT)) err = 'Check-out must be after check-in.';
+  let rec;
+  if (t === 'leave') rec = { type: 'leave' };
+  else {
+    rec = t === 'half' ? { type: 'half' } : {};
+    if (inT) rec.in = inT;
+    if (inT && outT) rec.out = outT;
+  }
+  return { date, rec, err, soft };
 }
 
 function updatePreview() {
-  const { date, rec, err } = readForm(), el = $('#editPreview'), st = S();
-  if (err) { el.innerHTML = `<span class="${form.in.value ? 'err' : 'muted'}">${err}</span>`; return; }
-  const a = analyze(date, rec);
-  let html = `Counts as <b>${fmtClock(a.inR)}</b>`;
-  if (a.done) {
-    html += ` → <b>${fmtClock(a.outR)}</b> = <b>${fmtDur(a.worked)}</b>
-      <span class="${cls(a.diff)}-t">(${a.diff === 0 ? '±0' : fmtDur(a.diff, true)}${a.extra ? ' extra' : ` vs ${fmtDur(st.target)}`})</span>`;
-  } else html += ' · no check-out yet';
-  if (a.late) html += `<br><span class="bad-t">After the ${fmtClock(st.latest)} check-in limit</span>`;
-  if (a.underMin) html += `<br><span class="bad-t">Below the ${fmtDur(st.minimum)} minimum</span>`;
-  el.innerHTML = html;
+  const { date, rec, err, soft } = readForm(), el = $('#editPreview'), st = S();
+  if (err) { el.innerHTML = `<span class="${soft ? 'muted' : 'err'}">${err}</span>`; return; }
+  const a = analyze(date, rec), lines = [];
+  if (a.type === 'leave') lines.push(`Holiday — counts as <b>${fmtDur(a.credit)}</b>.`);
+  else {
+    if (a.type === 'half') lines.push(`Half day: <b>${fmtDur(a.credit)}</b> credited.`);
+    if (a.inR != null) {
+      lines.push(`Counts as <b>${fmtClock(a.inR)}</b>` + (a.open ? ' · no check-out yet'
+        : ` → <b>${fmtClock(a.outR)}</b> = <b>${fmtDur(a.worked)}</b> worked`));
+      if (a.inRaw < st.earliest) lines.push(`<span class="muted">Before ${fmtClock(st.earliest)} counts as ${fmtClock(st.earliest)}.</span>`);
+      if (!a.open && a.outRaw > st.latestOut) lines.push(`<span class="muted">After ${fmtClock(st.latestOut)} counts as ${fmtClock(st.latestOut)}.</span>`);
+    }
+  }
+  if (!a.open) lines.push(`Day total <b>${fmtDur(a.total)}</b> <span class="${cls(a.diff)}-t">(${fmtDiff(a.diff)}${a.workday ? ` vs ${fmtDur(a.required)}` : ' extra'})</span>`);
+  if (a.late) lines.push(`<span class="bad-t">After the ${fmtClock(st.latest)} check-in limit</span>`);
+  if (a.underMin) lines.push(`<span class="bad-t">Below the ${fmtDur(st.minimum)} minimum</span>`);
+  el.innerHTML = lines.join('<br>');
 }
 
-form.addEventListener('input', e => {
-  if (e.target === form.extra) extraTouched = true;
-  if (e.target === form.date && !extraTouched && form.date.value) form.extra.checked = isWeekend(form.date.value);
-  updatePreview();
-});
+$('#typeSeg').addEventListener('click', e => { const b = e.target.closest('[data-type]'); if (b) setType(b.dataset.type); });
+form.addEventListener('input', updatePreview);
 $('#btnClearOut').addEventListener('click', () => { form.out.value = ''; updatePreview(); });
 form.addEventListener('submit', e => {
   e.preventDefault();
   const { date, rec, err } = readForm();
   if (err) { updatePreview(); return; }
-  if (date !== editingKey && state.days[date] && !confirm(`${fmtDate(date, { weekday: 'short', day: 'numeric', month: 'short' })} already has times. Replace them?`)) return;
+  if (date !== editingKey && state.days[date] && !confirm(`${fmtDate(date, { weekday: 'short', day: 'numeric', month: 'short' })} already has an entry. Replace it?`)) return;
   if (editingKey && editingKey !== date) delete state.days[editingKey];
   state.days[date] = rec;
   save(); dlgEdit.close();
-  // jump to the period containing the saved day
   for (let off = 0; off > -36; off--) { const p = periodByOffset(off); if (date >= p.start && date <= p.end) { viewOffset = off; break; } }
   render(); toast('Saved');
 });
@@ -648,27 +775,31 @@ $('#btnDelete').addEventListener('click', () => {
 
 /* ---------- settings dialog ---------- */
 const dlgSettings = $('#dlgSettings');
-const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 function fillSettings() {
   const st = S();
   $('#setTarget').value = st.target / 60;
   $('#setMinimum').value = st.minimum / 60;
+  $('#setEarliest').value = toHHMM(st.earliest);
   $('#setLatest').value = toHHMM(st.latest);
+  $('#setLatestOut').value = toHHMM(st.latestOut);
   $('#setStep').value = String(st.step);
   $('#setOut').value = st.outRound;
   $('#setStart').value = st.periodStart;
   $('#setClock24').checked = st.clock24;
   $('#setWeekend').innerHTML = DAY_NAMES.map((n, i) => `<button type="button" data-day="${i}" aria-pressed="${st.weekend.includes(i)}">${n.slice(0, 2)}</button>`).join('');
-  const ex = [577, 659, 661];
-  $('#inRoundNote').textContent = `Up: ${ex.map(m => `${fmtClock(m).replace(/ [AP]M/, '')}→${fmtClock(roundIn(m)).replace(/ [AP]M/, '')}`).join(', ')}`;
+  const short = m => fmtClock(m).replace(/ [AP]M/, '');
+  $('#inRoundNote').textContent = `Up: ${[577, 659, 661].map(m => `${short(m)}→${short(roundIn(m))}`).join(', ')}`;
+  $('#limitsNote').textContent = `Fingerprint before ${fmtClock(st.earliest)} counts as ${fmtClock(st.earliest)}; after ${fmtClock(st.latestOut)} counts as ${fmtClock(st.latestOut)}.`;
+  const off = st.weekend.map(d => DAY_NAMES[d]).join(', ') || 'none';
   $('#rulesList').innerHTML = `
-    <li>Check-in rounds <b>up</b> to the next ${st.step} min; check-out ${{ down: 'rounds down', exact: 'uses the exact minute', nearest: 'rounds to the nearest', up: 'rounds up' }[st.outRound]}${st.outRound === 'exact' ? '' : ` to ${st.step} min`}.</li>
-    <li>Latest check-in is ${fmtClock(st.latest)}.</li>
-    <li>Each workday needs ${fmtDur(st.target)}; at least ${fmtDur(st.minimum)} must be done that day.</li>
-    <li>Whatever you're short (e.g. ${fmtDur(st.target - st.minimum)} on a ${fmtDur(st.minimum)} day) becomes debt you make up on other days.</li>
-    <li>Debt and extra hours are counted per period: day ${st.periodStart} to day ${st.periodStart === 1 ? 'end of month' : st.periodStart - 1 + ' of next month'}.</li>
-    <li>Hours on days off count as pure extra.</li>`;
+    <li>Check-in rounds <b>up</b> to the next ${st.step} min (9:37 → 9:45). Before ${fmtClock(st.earliest)} counts as ${fmtClock(st.earliest)}. Latest check-in ${fmtClock(st.latest)}.</li>
+    <li>Check-out ${{ down: 'rounds down', exact: 'uses the exact minute', nearest: 'rounds to the nearest', up: 'rounds up' }[st.outRound]}${st.outRound === 'exact' ? '' : ` to ${st.step} min`}. After ${fmtClock(st.latestOut)} counts as ${fmtClock(st.latestOut)}.</li>
+    <li>Every workday needs ${fmtDur(st.target)}, and at least ${fmtDur(st.minimum)} on a normal day. Day off: ${off} — hours then count as extra.</li>
+    <li>A half day adds ${fmtDur(halfCredit())}; a holiday adds ${fmtDur(st.target)}.</li>
+    <li>Period target = ${fmtDur(st.target)} × every workday from day ${st.periodStart} to day ${st.periodStart === 1 ? 'end of month' : st.periodStart - 1 + ' of next month'}, counted from your first logged day. A workday with nothing logged counts as 0h.</li>
+    <li>Short days become debt; longer days pay it back within the same period.</li>`;
 }
 
 function hoursInput(el, key, min) {
@@ -680,7 +811,9 @@ dlgSettings.addEventListener('change', e => {
   const st = state.settings, t = e.target;
   if (t.id === 'setTarget') hoursInput(t, 'target', 0.25);
   else if (t.id === 'setMinimum') hoursInput(t, 'minimum', 0);
+  else if (t.id === 'setEarliest' && t.value) { const v = toMin(t.value); if (v < st.latestOut) st.earliest = v; }
   else if (t.id === 'setLatest' && t.value) st.latest = toMin(t.value);
+  else if (t.id === 'setLatestOut' && t.value) { const v = toMin(t.value); if (v > st.earliest) st.latestOut = v; }
   else if (t.id === 'setStep') st.step = Number(t.value);
   else if (t.id === 'setOut') st.outRound = t.value;
   else if (t.id === 'setStart') { const v = parseInt(t.value, 10); if (v >= 1 && v <= 28) { st.periodStart = v; viewOffset = 0; } }
@@ -698,7 +831,7 @@ $('#setWeekend').addEventListener('click', e => {
 
 $('#btnExport').addEventListener('click', async () => {
   const name = `fingerprint-hours-${todayKey()}.json`;
-  const json = JSON.stringify({ app: 'fingerprint-hours', version: 1, exported: new Date().toISOString(), ...state }, null, 2);
+  const json = JSON.stringify({ app: 'fingerprint-hours', version: 2, exported: new Date().toISOString(), ...state }, null, 2);
   const file = new File([json], name, { type: 'application/json' });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try { await navigator.share({ files: [file], title: name }); return; }
@@ -716,7 +849,7 @@ $('#fileImport').addEventListener('change', async e => {
     const data = JSON.parse(await f.text());
     if (!data || typeof data.days !== 'object') throw new Error('bad');
     const n = Object.keys(data.days).length;
-    if (!confirm(`Replace everything on this phone with the backup (${n} day${n === 1 ? '' : 's'})?`)) return;
+    if (!confirm(`Replace everything on this phone with the backup (${plural(n, 'day')})?`)) return;
     state = { settings: { ...DEFAULTS, ...data.settings }, days: data.days };
     save(); viewOffset = 0; fillSettings(); render(); toast('Backup restored');
   } catch (err) { alert('That file is not a valid backup.'); }
@@ -739,6 +872,8 @@ document.addEventListener('click', e => {
   switch (act.dataset.act) {
     case 'checkin': checkIn(); break;
     case 'checkout': checkOut(); break;
+    case 'mark-half': markToday('half'); break;
+    case 'mark-leave': markToday('leave'); break;
     case 'edit-today': openEditor(todayKey()); break;
     case 'add': openEditor(null); break;
     case 'prev': viewOffset--; renderPeriod(); break;
@@ -750,12 +885,18 @@ render();
 setInterval(() => { if (!document.hidden && !dlgEdit.open) render(); }, 20000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { state = load(); render(); } });
 
+// Offline support + pick up new versions: when an update installs, reload once to show it.
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (hadController && !reloaded && !dlgEdit.open) { reloaded = true; location.reload(); }
+  });
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
 // handy for testing from the console
-window.FP = { get state() { return state; }, roundIn, roundOut, earliestOut, analyze, periodByOffset, summarize, render };
+window.FP = { get state() { return state; }, roundIn, clampIn, clampOut, earliestOut, analyze, periodByOffset, summarize, render };
 })();
 </script>
 </body>
