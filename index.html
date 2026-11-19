@@ -161,6 +161,16 @@ dialog::backdrop{background:rgba(0,0,0,.42)}
 .preview{margin:12px 2px 0;padding:12px 14px;border-radius:14px;background:var(--card);font-size:15px;line-height:1.5}
 .preview .err{color:var(--bad);font-weight:600}
 .delete{display:block;width:100%;margin-top:14px;padding:14px;border-radius:14px;background:var(--card);color:var(--bad);font-weight:600}
+.steps{background:var(--card);border-radius:14px;margin-top:10px;padding:0 14px}
+.steps summary{padding:14px 0;color:var(--accent);font-weight:600;cursor:pointer;list-style:none}
+.steps summary::-webkit-details-marker{display:none}
+.steps summary::after{content:" ›";}
+.steps[open] summary::after{content:" ⌄";}
+.steps h4{margin:6px 0 4px;font-size:15px}
+.steps ol{margin:0 0 14px;padding-left:22px;font-size:14.5px;line-height:1.5}
+.steps li{margin:4px 0}
+.steps p{margin:0 0 14px;font-size:14px;color:var(--muted)}
+.steps code{background:var(--chip);padding:1px 6px;border-radius:6px;font-size:13.5px;white-space:nowrap}
 .rules{margin:0;padding:12px 16px 12px 32px;font-size:14px;color:var(--muted)}
 .rules li{margin:3px 0}
 
@@ -233,9 +243,9 @@ dialog::backdrop{background:rgba(0,0,0,.42)}
         <select id="setStep"><option value="5">5 min</option><option value="10">10 min</option><option value="15">15 min</option><option value="30">30 min</option></select></label>
       <div class="field"><span>Check-in</span><span class="muted" id="inRoundNote">Always rounds up</span></div>
       <label class="field"><span>Check-out</span>
-        <select id="setOut"><option value="down">Round down</option><option value="exact">Exact minute</option><option value="nearest">Nearest</option><option value="up">Round up</option></select></label>
+        <select id="setOut"><option value="up">Round up</option><option value="down">Round down</option><option value="exact">Exact minute</option><option value="nearest">Nearest</option></select></label>
     </div>
-    <p class="group-note">Not sure how check-out is rounded? Keep “Round down” — the app will never count more than you really get.</p>
+    <p class="group-note" id="outRoundNote"></p>
 
     <p class="group-title">Period</p>
     <div class="group">
@@ -243,6 +253,18 @@ dialog::backdrop{background:rgba(0,0,0,.42)}
       <div class="field col"><span>My attendance days</span><div class="days" id="setWorkdays"></div></div>
     </div>
     <p class="group-note" id="workdaysNote"></p>
+
+    <p class="group-title">Check-in reminder</p>
+    <div class="group">
+      <label class="field"><span>Run “Hours Check-in” shortcut when I check in<br><small class="muted">Before the reminder time, on attendance days</small></span><input type="checkbox" id="setShortcut"></label>
+      <label class="field"><span>Reminder time</span><input type="time" id="setRemindAt"></label>
+      <button class="field btn" id="btnTestShortcut">Test the shortcut now</button>
+    </div>
+    <p class="group-note" id="reminderNote"></p>
+    <details class="steps">
+      <summary>How to set up the reminder (one time)</summary>
+      <div id="stepsBody"></div>
+    </details>
 
     <p class="group-title">Display</p>
     <div class="group">
@@ -272,22 +294,29 @@ dialog::backdrop{background:rgba(0,0,0,.42)}
 /* ---------- storage ---------- */
 const KEY = 'fphours.v1';
 const DEFAULTS = {
+  v: 2,               // settings version (v2: check-out rounds up)
   target: 420,        // required minutes per workday (7h)
   minimum: 240,       // minimum minutes on a normal workday (4h)
   earliest: 480,      // fingerprint before this counts as this (8:00)
   latest: 720,        // latest allowed check-in (12:00)
   latestOut: 1140,    // fingerprint after this counts as this (19:00)
   step: 15,           // rounding step in minutes
-  outRound: 'down',   // check-out rounding: down | exact | nearest | up
+  outRound: 'up',     // check-out rounding: up (4:19 → 4:30) | down | exact | nearest
   periodStart: 16,    // period runs from this day to the day before it next month
   workdays: [2, 4, 6], // attendance days (0=Sun … 6=Sat): Tue, Thu, Sat. Hours on other days are pure extra
-  clock24: false
+  clock24: false,
+  shortcutOn: false,  // run the "Hours Check-in" iPhone shortcut on check-in (feeds the 11:30 reminder)
+  remindAt: 690       // reminder time (11:30)
 };
+const SHORTCUT_NAME = 'Hours Check-in';
+const SHORTCUT_FILE = 'hours-checkin.txt';
 function load() {
   try {
     const s = JSON.parse(localStorage.getItem(KEY));
     if (s && s.days && typeof s.days === 'object') {
       const settings = { ...DEFAULTS, ...s.settings };
+      if (!(s.settings && s.settings.v >= 2)) settings.outRound = 'up'; // v2: check-out rounds up
+      settings.v = DEFAULTS.v;
       delete settings.weekend; // replaced by workdays
       if (!Array.isArray(settings.workdays) || !settings.workdays.length) settings.workdays = DEFAULTS.workdays.slice();
       return { settings, days: s.days };
@@ -485,9 +514,9 @@ function renderToday() {
     else if (now >= st.latestOut) pills.push(`<span class="pill bad">After ${fmtClock(st.latestOut)} — nothing counts now</span>`);
     else if (!half) {
       const left = st.latest - now;
-      pills.push(left >= 0
-        ? `<span class="pill ${left <= 30 ? 'warn' : 'good'}">Latest check-in ${fmtClock(st.latest)} · ${fmtDur(left)} left</span>`
-        : `<span class="pill bad">Past the ${fmtClock(st.latest)} check-in limit</span>`);
+      pills.push(left < 0 ? `<span class="pill bad">Past the ${fmtClock(st.latest)} check-in limit</span>`
+        : now >= st.remindAt ? `<span class="pill bad">⏰ Not checked in — ${fmtDur(left)} left until ${fmtClock(st.latest)}</span>`
+        : `<span class="pill ${left <= 30 ? 'warn' : 'good'}">Latest check-in ${fmtClock(st.latest)} · ${fmtDur(left)} left</span>`);
     }
     el.innerHTML = `${head}
       <div class="center" style="margin-top:12px">
@@ -677,6 +706,7 @@ function checkIn() {
   state.days[tk] = { ...rec, in: toHHMM(now) };
   save(); render();
   toast(`Checked in ${fmtClock(now)} → counts as ${fmtClock(clampIn(now))}`);
+  maybeRunShortcut(tk);
 }
 function checkOut() {
   const st = S(), tk = todayKey(), rec = state.days[tk];
@@ -692,6 +722,20 @@ function markToday(type) {
   state.days[todayKey()] = { type };
   save(); render();
   toast(type === 'leave' ? `Holiday — counts as ${fmtDur(S().target)}` : `Half day — ${fmtDur(halfCredit())} credited`);
+  maybeRunShortcut(todayKey());
+}
+
+// 11:30 reminder: iPhone web apps can't schedule notifications, so an iOS Shortcuts automation does it.
+// On check-in (attendance day, before the reminder time) we run the "Hours Check-in" shortcut, which
+// writes today's date to a file; the automation only notifies if that file doesn't have today's date.
+let openUrl = url => { location.href = url; };
+function runCheckinShortcut() {
+  openUrl('shortcuts://run-shortcut?name=' + encodeURIComponent(SHORTCUT_NAME));
+}
+function maybeRunShortcut(k) {
+  const st = S();
+  if (!st.shortcutOn || k !== todayKey() || isWeekend(k) || nowMin() >= st.remindAt) return;
+  runCheckinShortcut();
 }
 
 /* ---------- edit dialog ---------- */
@@ -775,6 +819,7 @@ form.addEventListener('submit', e => {
   save(); dlgEdit.close();
   for (let off = 0; off > -36; off--) { const p = periodByOffset(off); if (date >= p.start && date <= p.end) { viewOffset = off; break; } }
   render(); toast('Saved');
+  if (rec.in || rec.type) maybeRunShortcut(date);
 });
 $('#btnDelete').addEventListener('click', () => {
   if (!editingKey) return;
@@ -797,11 +842,41 @@ function fillSettings() {
   $('#setOut').value = st.outRound;
   $('#setStart').value = st.periodStart;
   $('#setClock24').checked = st.clock24;
+  $('#setShortcut').checked = st.shortcutOn;
+  $('#setRemindAt').value = toHHMM(st.remindAt);
   $('#setWorkdays').innerHTML = WEEK_ORDER.map(i => `<button type="button" data-day="${i}" aria-pressed="${st.workdays.includes(i)}" aria-label="${DAY_NAMES[i]}">${DAY_NAMES[i].slice(0, 2)}</button>`).join('');
   const nDays = st.workdays.length;
   $('#workdaysNote').textContent = `${plural(nDays, 'day')} a week × ${fmtDur(st.target)} = ${fmtDur(nDays * st.target)} a week, ${fmtDur(2 * nDays * st.target)} every 2 weeks. Hours on other days count as extra.`;
   const short = m => fmtClock(m).replace(/ [AP]M/, '');
   $('#inRoundNote').textContent = `Up: ${[577, 659, 661].map(m => `${short(m)}→${short(roundIn(m))}`).join(', ')}`;
+  $('#outRoundNote').textContent = `Check-out examples: ${[979, 990, 991].map(m => `${short(m)} → ${short(roundOut(m))}`).join(', ')}.`;
+  const time = fmtClock(st.remindAt), dayList = WEEK_ORDER.filter(d => st.workdays.includes(d)).map(d => DAY_NAMES[d]).join(', ');
+  $('#reminderNote').textContent = `At ${time} on ${dayList}, your iPhone checks whether you checked in today and notifies you only if you haven't. If anything goes wrong, you simply get the reminder anyway.`;
+  $('#stepsBody').innerHTML = `
+    <h4>1 · Shortcut that remembers your check-in</h4>
+    <ol>
+      <li>Open the <b>Shortcuts</b> app → <b>Shortcuts</b> tab → <b>+</b>.</li>
+      <li>Tap the name at the top → <b>Rename</b> → type <code>${SHORTCUT_NAME}</code> exactly.</li>
+      <li>Add the action <b>Format Date</b>. Keep <b>Current Date</b>. Tap <b>›</b> → Date Format <b>Custom</b> → Format String <code>yyyy-MM-dd</code>.</li>
+      <li>Add the action <b>Save File</b>. Tap <b>›</b> → turn <b>off</b> Ask Where to Save → folder <b>Shortcuts</b> → Subpath <code>${SHORTCUT_FILE}</code> → turn <b>on</b> Overwrite If File Exists.</li>
+      <li>Tap <b>Done</b>.</li>
+    </ol>
+    <h4>2 · The ${time} automation</h4>
+    <ol>
+      <li>Shortcuts → <b>Automation</b> tab → <b>+</b> → <b>Time of Day</b>.</li>
+      <li>Time <b>${time}</b>, Repeat <b>Weekly</b> with only <b>${dayList}</b> ticked, choose <b>Run Immediately</b> and turn off <b>Notify When Run</b> → <b>Next</b> → <b>New Blank Automation</b>.</li>
+      <li>Add <b>Get File</b>: folder <b>Shortcuts</b>, path <code>${SHORTCUT_FILE}</code>, turn <b>off</b> Error If Not Found.</li>
+      <li>Add <b>Format Date</b>: Current Date, Custom, <code>yyyy-MM-dd</code>.</li>
+      <li>Add <b>Text</b>, tap inside it and pick the <b>File</b> variable from the bar above the keyboard.</li>
+      <li>Add <b>If</b>: <b>Text</b> · <b>does not contain</b> · <b>Formatted Date</b>.</li>
+      <li>Inside the If (above <b>Otherwise</b>) add <b>Show Notification</b> with <code>⏰ Do the fingerprint! Latest check-in ${fmtClock(st.latest)}</code> → <b>Done</b>.</li>
+    </ol>
+    <h4>3 · Switch it on here</h4>
+    <ol>
+      <li>Turn on <b>Run “${SHORTCUT_NAME}” shortcut</b> above.</li>
+      <li>Tap <b>Test the shortcut now</b> and allow whatever iOS asks (open Shortcuts, save the file, notifications). Come back with <b>◀ Hours</b> at the top-left.</li>
+    </ol>
+    <p>No iCloud Drive? Pick any folder <b>On My iPhone</b> instead — just use the same folder in both shortcuts. On iOS 16, turn off “Ask Before Running” instead of choosing Run Immediately. If you change the reminder time here, change the automation's time too.</p>`;
   $('#limitsNote').textContent = `Fingerprint before ${fmtClock(st.earliest)} counts as ${fmtClock(st.earliest)}; after ${fmtClock(st.latestOut)} counts as ${fmtClock(st.latestOut)}.`;
   $('#rulesList').innerHTML = `
     <li>Check-in rounds <b>up</b> to the next ${st.step} min (9:37 → 9:45). Before ${fmtClock(st.earliest)} counts as ${fmtClock(st.earliest)}. Latest check-in ${fmtClock(st.latest)}.</li>
@@ -828,6 +903,8 @@ dlgSettings.addEventListener('change', e => {
   else if (t.id === 'setOut') st.outRound = t.value;
   else if (t.id === 'setStart') { const v = parseInt(t.value, 10); if (v >= 1 && v <= 28) { st.periodStart = v; viewOffset = 0; } }
   else if (t.id === 'setClock24') st.clock24 = t.checked;
+  else if (t.id === 'setShortcut') st.shortcutOn = t.checked;
+  else if (t.id === 'setRemindAt' && t.value) st.remindAt = toMin(t.value);
   else return;
   save(); fillSettings(); render();
 });
@@ -852,6 +929,7 @@ $('#btnExport').addEventListener('click', async () => {
   a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 });
+$('#btnTestShortcut').addEventListener('click', runCheckinShortcut);
 $('#btnImport').addEventListener('click', () => $('#fileImport').click());
 $('#fileImport').addEventListener('change', async e => {
   const f = e.target.files[0]; e.target.value = '';
@@ -907,7 +985,8 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
 }
 
 // handy for testing from the console
-window.FP = { get state() { return state; }, roundIn, clampIn, clampOut, earliestOut, analyze, periodByOffset, summarize, render };
+window.FP = { get state() { return state; }, roundIn, roundOut, clampIn, clampOut, earliestOut, analyze, periodByOffset, summarize, render,
+  setOpenUrl: fn => { openUrl = fn; } };
 })();
 </script>
 </body>
