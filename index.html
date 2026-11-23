@@ -122,6 +122,14 @@ main{max-width:560px;margin:0 auto;padding:2px 14px 48px}
 .row-right{text-align:right;flex:none}
 .row-right b{display:block;font-size:16px}
 .chip{display:inline-block;font-size:12px;font-weight:620;padding:2px 8px;border-radius:99px;background:var(--chip);color:var(--muted);margin-top:3px}
+.row.missing{background:var(--bad-soft);box-shadow:inset 4px 0 0 var(--bad)}
+.row.missing .times{color:var(--bad);font-weight:650}
+.row.missing .row-sub{color:var(--bad);opacity:.85}
+.alert{background:var(--bad-soft);border:1.5px solid var(--bad);border-radius:18px;padding:14px 16px;margin:12px 0}
+.alert b.head{display:block;color:var(--bad);font-size:16.5px}
+.alert p{margin:4px 0 10px;font-size:14px}
+.alert .fix{display:flex;flex-wrap:wrap;gap:6px}
+.alert .fix button{background:var(--card);color:var(--bad);border-radius:999px;padding:8px 12px;font-weight:620;font-size:14px}
 .flag{font-size:12px;font-weight:650}
 .flag + .flag::before{content:" · ";color:var(--muted)}
 .empty{padding:28px 16px;text-align:center;color:var(--muted)}
@@ -188,6 +196,7 @@ dialog::backdrop{background:rgba(0,0,0,.42)}
 </header>
 
 <main>
+  <div id="alert"></div>
   <section class="card" id="today"></section>
   <section class="card" id="period"></section>
   <div class="section-head"><h2>Days</h2><button class="add-btn" data-act="add">+ Add day</button></div>
@@ -429,25 +438,29 @@ function analyze(k, rec, liveNow) {
   return a;
 }
 
-function periodByOffset(off) {
-  const st = S().periodStart, t = dateOf(todayKey());
+// The period (e.g. 16th → 15th) that contains day k, shifted by `off` periods
+function periodOf(k, off = 0) {
+  const st = S().periodStart, t = dateOf(k);
   let y = t.getFullYear(), m = t.getMonth();
   if (t.getDate() < st) m -= 1;
   m += off;
   return { start: keyOf(new Date(y, m, st)), end: keyOf(new Date(y, m + 1, st - 1)) };
 }
+const periodByOffset = off => periodOf(todayKey(), off);
 
 const firstLogged = () => Object.keys(state.days).sort()[0];
+// Missed days count from the start of the period in which you started using the app
+const trackingStart = () => { const f = firstLogged(); return f ? periodOf(f).start : null; };
 
-// Period totals. Every attendance day from the first logged day on needs `target`
-// (e.g. Sat/Tue/Thu × 7h = 42h per 2 weeks); past attendance days with nothing logged count as 0h.
-// Hours on other days are extra. Today counts once it's finished.
+// Period totals. Every attendance day from the tracking start on needs `target`
+// (e.g. Sat/Tue/Thu × 7h = 42h per 2 weeks); past attendance days with nothing logged count as 0h
+// (a day you should have attended). Hours on other days are extra. Today counts once it's finished.
 function summarize(p) {
-  const st = S(), tk = todayKey(), first = firstLogged();
+  const st = S(), tk = todayKey(), start = trackingStart();
   const sum = { worked: 0, credit: 0, required: 0, target: 0, targetDays: 0, leaveDays: 0, halfDays: 0,
-                under: 0, late: 0, missing: 0, unlogged: 0, list: [] };
-  if (first) {
-    const from = first > p.start ? first : p.start;
+                under: 0, late: 0, missing: 0, unlogged: 0, problems: [], list: [] };
+  if (start) {
+    const from = start > p.start ? start : p.start;
     for (let k = p.start; k <= p.end; k = addDays(k, 1)) {
       const workday = !isWeekend(k), tracked = k >= from;
       if (tracked && workday) { sum.target += st.target; sum.targetDays++; }
@@ -457,6 +470,7 @@ function summarize(p) {
         if (tracked && workday && k < tk) {
           sum.required += st.target; sum.unlogged++;
           sum.list.push({ key: k, unlogged: true });
+          sum.problems.push({ key: k, kind: 'missing', lost: st.target });
         }
         continue;
       }
@@ -467,7 +481,7 @@ function summarize(p) {
       if (a.type === 'leave' && a.workday) sum.leaveDays++;
       if (a.type === 'half' && a.workday) sum.halfDays++;
       if (a.underMin) sum.under++;
-      if (a.open) sum.missing++;                    // past day without check-out
+      if (a.open) { sum.missing++; sum.problems.push({ key: k, kind: 'checkout', lost: Math.max(0, -a.diff) }); } // past day without check-out
     }
   }
   sum.total = sum.worked + sum.credit;
@@ -615,7 +629,7 @@ function renderPeriod() {
   const todayRec = state.days[tk], todayOpen = cur && todayRec && todayRec.in && !todayRec.out;
 
   let hint = '';
-  if (!hasData) hint = `Your attendance days: <b>${daysText()}</b> (${fmtDur(st.target)} each — change in Settings). Check in to start; the period target counts from your first logged day.`;
+  if (!hasData) hint = `Your attendance days: <b>${daysText()}</b> (${fmtDur(st.target)} each — change in Settings). Check in to start. From then on, every attendance day in the period counts, even ones you forget to log.`;
   else if (cur) {
     const n = workdaysLeft(p), maxDay = st.latestOut - st.earliest;
     if (b < 0 && n > 0) {
@@ -633,8 +647,8 @@ function renderPeriod() {
     }
   }
   const flags = [];
-  if (sum.unlogged) flags.push(`<span class="pill warn">${plural(sum.unlogged, 'attendance day')} not logged</span>`);
-  if (sum.missing) flags.push(`<span class="pill warn">${plural(sum.missing, 'missing check-out')}</span>`);
+  if (sum.unlogged) flags.push(`<span class="pill bad">⚠ ${plural(sum.unlogged, 'missing day')} (−${fmtDur(sum.unlogged * st.target)})</span>`);
+  if (sum.missing) flags.push(`<span class="pill bad">⚠ ${plural(sum.missing, 'missing check-out')}</span>`);
   if (sum.under) flags.push(`<span class="pill bad">${plural(sum.under, 'day')} below ${fmtDur(st.minimum)}</span>`);
   if (sum.late) flags.push(`<span class="pill bad">${plural(sum.late, 'late check-in')}</span>`);
   const breakdown = [`Worked ${fmtDur(sum.worked)}`];
@@ -664,8 +678,8 @@ function renderPeriod() {
   const rows = sum.list.slice().reverse().map(a => {
     const d = dateOf(a.key);
     const dateCol = `<div class="row-date"><b>${d.getDate()}</b><span>${fmtDate(a.key, { weekday: 'short' })}</span></div>`;
-    if (a.unlogged) return `<button class="row" data-edit="${a.key}">${dateCol}
-      <div class="row-main"><div class="times warn-t">Not logged</div><div class="row-sub">Tap to add times, holiday or half day</div></div>
+    if (a.unlogged) return `<button class="row missing" data-edit="${a.key}">${dateCol}
+      <div class="row-main"><div class="times">⚠ Missing day</div><div class="row-sub">Should have attended · tap to add times, holiday or half day</div></div>
       <div class="row-right"><b>0h</b><span class="chip bad">${fmtDiff(-st.target)}</span></div></button>`;
     const flagsTxt = [];
     if (!a.workday) flagsTxt.push('<span class="flag" style="color:var(--accent)">extra day</span>');
@@ -679,9 +693,11 @@ function renderPeriod() {
     else { main = times; sub = clock; }
     let right;
     if (a.open && a.key === tk) right = `<b>${fmtDur(a.total)}</b><span class="chip accent">at work</span>`;
-    else if (a.open) right = `<b>${fmtDur(a.total)}</b><span class="chip warn">no check-out</span>`;
+    else if (a.open) right = `<b>${fmtDur(a.total)}</b><span class="chip bad">no check-out</span>`;
     else right = `<b>${fmtDur(a.total)}</b><span class="chip ${cls(a.diff)}">${fmtDiff(a.diff)}</span>`;
-    return `<button class="row" data-edit="${a.key}">${dateCol}
+    const pastOpen = a.open && a.key !== tk;
+    if (pastOpen) sub = `⚠ No check-out — counts as ${fmtDur(a.total)} until you add it${sub ? ' · ' + sub : ''}`;
+    return `<button class="row${pastOpen ? ' missing' : ''}" data-edit="${a.key}">${dateCol}
       <div class="row-main"><div class="times">${main}</div>
         <div class="row-sub">${flagsTxt.join('')}${flagsTxt.length && sub ? ' · ' : ''}${sub}</div></div>
       <div class="row-right">${right}</div>
@@ -690,7 +706,21 @@ function renderPeriod() {
   $('#history').innerHTML = rows || `<div class="empty">No days logged in this period yet.</div>`;
 }
 
-function render() { renderToday(); renderPeriod(); }
+// Red banner at the top while the current period has missing days or missing check-outs
+function renderAlert() {
+  const st = S(), probs = summarize(periodByOffset(0)).problems;
+  if (!probs.length) { $('#alert').innerHTML = ''; return; }
+  const lost = probs.reduce((n, p) => n + p.lost, 0), nMissing = probs.filter(p => p.kind === 'missing').length;
+  const what = [nMissing ? plural(nMissing, 'missing day') : '', probs.length > nMissing ? plural(probs.length - nMissing, 'missing check-out') : '']
+    .filter(Boolean).join(' and ');
+  const chips = probs.map(p => `<button data-edit="${p.key}">${fmtDate(p.key, { weekday: 'short', day: 'numeric', month: 'short' })}${p.kind === 'checkout' ? ' · no check-out' : ''}</button>`).join('');
+  $('#alert').innerHTML = `<div class="alert" role="alert">
+    <b class="head">⚠ ${what}${lost ? ` · −${fmtDur(lost)}` : ''}</b>
+    <p>${nMissing ? `These count as days you should have attended (${fmtDur(st.target)} each). ` : ''}Tap a day to add your times, or mark it as a holiday or half day.</p>
+    <div class="fix">${chips}</div></div>`;
+}
+
+function render() { renderAlert(); renderToday(); renderPeriod(); }
 
 /* ---------- actions ---------- */
 let toastTimer;
@@ -883,7 +913,8 @@ function fillSettings() {
     <li>Check-out ${{ down: 'rounds down', exact: 'uses the exact minute', nearest: 'rounds to the nearest', up: 'rounds up' }[st.outRound]}${st.outRound === 'exact' ? '' : ` to ${st.step} min`}. After ${fmtClock(st.latestOut)} counts as ${fmtClock(st.latestOut)}.</li>
     <li>Each attendance day (${daysText()}) needs ${fmtDur(st.target)}, with at least ${fmtDur(st.minimum)} on the day. Hours on any other day count as extra.</li>
     <li>A half day adds ${fmtDur(halfCredit())}; a holiday adds ${fmtDur(st.target)}.</li>
-    <li>Period target = ${fmtDur(st.target)} × your attendance days from day ${st.periodStart} to day ${st.periodStart === 1 ? 'end of month' : st.periodStart - 1 + ' of next month'} (e.g. ${plural(2 * st.workdays.length, 'day')} in 2 weeks = ${fmtDur(2 * st.workdays.length * st.target)}), counted from your first logged day. An attendance day with nothing logged counts as 0h.</li>
+    <li>Period target = ${fmtDur(st.target)} × your attendance days from day ${st.periodStart} to day ${st.periodStart === 1 ? 'end of month' : st.periodStart - 1 + ' of next month'} (e.g. ${plural(2 * st.workdays.length, 'day')} in 2 weeks = ${fmtDur(2 * st.workdays.length * st.target)}), counted from the start of the period you began using the app.</li>
+    <li>A past attendance day with nothing logged is a <b>missing day</b>: it counts as 0h (−${fmtDur(st.target)}) and is highlighted in red until you add your times or mark it as a holiday or half day. A day with no check-out counts the same way.</li>
     <li>Short days become debt; longer days pay it back within the same period.</li>`;
 }
 
