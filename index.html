@@ -22,7 +22,7 @@
   --good:#15803d; --good-soft:rgba(22,163,74,.12);
   --bad:#c42b2b; --bad-soft:rgba(220,38,38,.10);
   --warn:#a35208; --warn-soft:rgba(217,119,6,.13);
-  --chip:#eff0f4; --track:#e6e6ee; --seg-on:#fff;
+  --chip:#eff0f4; --track:#e6e6ee; --seg-on:#fff; --tabbar:rgba(249,249,251,.94);
 }
 @media (prefers-color-scheme: dark){
   :root{
@@ -31,7 +31,7 @@
     --good:#4ade80; --good-soft:rgba(74,222,128,.13);
     --bad:#f87171; --bad-soft:rgba(248,113,113,.14);
     --warn:#fbbf24; --warn-soft:rgba(251,191,36,.14);
-    --chip:#2c2c2e; --track:#2c2c2e; --seg-on:#48484c;
+    --chip:#2c2c2e; --track:#2c2c2e; --seg-on:#48484c; --tabbar:rgba(22,22,24,.94);
   }
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -122,6 +122,35 @@ main{max-width:560px;margin:0 auto;padding:2px 14px 48px}
 .row-right{text-align:right;flex:none}
 .row-right b{display:block;font-size:16px}
 .chip{display:inline-block;font-size:12px;font-weight:620;padding:2px 8px;border-radius:99px;background:var(--chip);color:var(--muted);margin-top:3px}
+.week{margin-top:12px;background:var(--chip);border-radius:12px;padding:10px 12px;font-size:14px}
+.week-top{display:flex;justify-content:space-between;gap:8px}
+.week .bar{height:6px;background:var(--track);border-radius:99px;margin-top:7px;overflow:hidden}
+.week .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+.week-sub{font-size:12.5px;color:var(--muted);margin-top:5px;text-align:right}
+.seg.contract button{display:flex;flex-direction:column;align-items:center;line-height:1.2;padding:7px 4px}
+.seg.contract button b{font-size:16px}
+.seg.contract button small{font-size:12px;font-weight:500;opacity:.8}
+.sheet.setup{min-height:88vh;display:flex;flex-direction:column}
+#setupBody{flex:1}
+.setup-top{display:flex;justify-content:space-between;align-items:center;min-height:36px}
+.dots{display:flex;gap:6px;align-items:center}
+.dots i{width:8px;height:8px;border-radius:99px;background:var(--track)}
+.dots i.done{background:var(--accent);opacity:.45}
+.dots i.on{background:var(--accent);width:22px}
+.link{color:var(--accent);font-weight:600;padding:6px 2px}
+.setup .title{font-size:27px;font-weight:750;letter-spacing:-.02em;margin:14px 2px 6px;line-height:1.15}
+.setup .lead{font-size:16px;color:var(--muted);margin:0 2px 14px}
+.setup-nav{display:flex;gap:10px;margin-top:18px}
+.setup-nav .primary{margin-top:0;flex:2}
+.setup-nav .secondary{flex:1;padding:16px;border-radius:14px;background:var(--chip);font-weight:600;font-size:17px}
+.tip{display:flex;gap:12px;align-items:flex-start;background:var(--card);border-radius:14px;padding:12px 14px;margin:8px 0}
+.tip .ico{font-size:22px;line-height:1.25;width:28px;text-align:center;flex:none}
+.tip b{display:block;font-size:15.5px}
+.tip span{color:var(--muted);font-size:14.5px}
+.welcome-icon{width:88px;height:88px;border-radius:22px;margin:26px auto 4px;display:block;box-shadow:0 6px 20px rgba(0,0,0,.18)}
+.news h3{margin:18px 4px 4px;font-size:17px}
+.news p{margin:0 4px 10px;font-size:15px;color:var(--muted)}
+.news .group{padding:10px 12px}
 .row.missing{background:var(--bad-soft);box-shadow:inset 4px 0 0 var(--bad)}
 .row.missing .times{color:var(--bad);font-weight:650}
 .row.missing .row-sub{color:var(--bad);opacity:.85}
@@ -182,6 +211,49 @@ dialog::backdrop{background:rgba(0,0,0,.42)}
 .rules{margin:0;padding:12px 16px 12px 32px;font-size:14px;color:var(--muted)}
 .rules li{margin:3px 0}
 
+/* ---------- Simple layout (Option A) ---------- */
+.date-sub,.contract-badge,#todaySimple,#summary,.tabs{display:none}
+body.simple .date-sub{display:block;color:var(--muted);font-size:15px;margin-top:1px}
+body.simple .contract-badge{display:block;background:var(--card);border-radius:99px;padding:7px 12px;font-size:13px;font-weight:650;color:var(--accent);margin-left:auto}
+body.simple #btnSettings,body.simple #today{display:none}
+body.simple #todaySimple,body.simple #summary{display:block}
+body.simple .view{display:none}
+body.simple .view.on{display:block}
+body.simple main{padding-bottom:100px}
+body.simple .tabs{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--tabbar);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-top:1px solid var(--line);padding:6px 0 calc(6px + env(safe-area-inset-bottom))}
+.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11.5px;font-weight:600;color:var(--muted);padding:4px 0}
+.tabs button.on{color:var(--accent)}
+.tabs svg{width:25px;height:25px}
+body.simple .toast{bottom:calc(90px + env(safe-area-inset-bottom))}
+.ring{position:relative;width:236px;height:236px;margin:16px auto 4px}
+.ring svg{transform:rotate(-90deg);display:block}
+.ring .c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 30px}
+.ring .c b{font-size:46px;letter-spacing:-.035em;line-height:1}
+.ring .c span{color:var(--muted);font-size:15px;margin-top:6px}
+.ring.text .c b{font-size:34px}
+.s-status{text-align:center;color:var(--muted);font-size:15px}
+.s-status b{color:var(--text)}
+.s-status .good-t{color:var(--good)} .s-status .bad-t{color:var(--bad)} .s-status .warn-t{color:var(--warn)}
+.big-btn{display:block;width:100%;margin-top:18px;padding:20px;border-radius:20px;background:var(--btn);color:#fff;text-align:center;font-size:21px;font-weight:700;box-shadow:0 8px 20px rgba(79,70,229,.25)}
+.big-btn:active{filter:brightness(.9)}
+.big-btn small{display:block;font-size:13.5px;font-weight:500;opacity:.85;margin-top:2px}
+.big-btn.soft{background:var(--card);color:var(--accent);box-shadow:none;font-size:18px;padding:16px}
+.s-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.s-tiles div{background:var(--card);border-radius:16px;padding:12px 8px;text-align:center}
+.s-tiles span{display:block;font-size:12.5px;color:var(--muted)}
+.s-tiles b{font-size:20px}
+.s-tiles .ok b{color:var(--good)}
+.s-tiles .cap b{color:var(--warn)}
+.s-note{text-align:center;font-size:13.5px;color:var(--muted);margin-top:10px}
+.sum-box{display:block;width:100%;text-align:left;background:var(--card);border-radius:18px;padding:14px 16px;margin-top:14px}
+.sum-row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.sum-row span{color:var(--muted);font-size:14.5px}
+.sum-row b{font-size:18px}
+.sum-row2{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.sum-box .bar{height:6px;background:var(--track);border-radius:99px;margin-top:6px;overflow:hidden}
+.sum-box .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+.sum-more{margin-top:10px;color:var(--accent);font-weight:600;font-size:14.5px;text-align:right}
+
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,20px);background:rgba(28,28,30,.94);color:#fff;
   padding:12px 16px;border-radius:14px;font-size:15px;opacity:0;transition:.25s;pointer-events:none;width:max-content;max-width:90vw;text-align:center;z-index:10}
 .toast.show{opacity:1;transform:translate(-50%,0)}
@@ -189,19 +261,33 @@ dialog::backdrop{background:rgba(0,0,0,.42)}
 </head>
 <body>
 <header class="top">
-  <h1>Hours</h1>
+  <div><h1>Hours</h1><div class="date-sub" id="hdrDate"></div></div>
+  <button class="contract-badge" id="hdrBadge" data-tab="settings"></button>
   <button class="icon-btn" id="btnSettings" aria-label="Settings">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
   </button>
 </header>
 
 <main>
-  <div id="alert"></div>
-  <section class="card" id="today"></section>
-  <section class="card" id="period"></section>
-  <div class="section-head"><h2>Days</h2><button class="add-btn" data-act="add">+ Add day</button></div>
-  <div class="list" id="history"></div>
+  <div class="view on" id="viewToday">
+    <div id="alert"></div>
+    <section class="card" id="today"></section>
+    <div id="todaySimple"></div>
+    <div id="summary"></div>
+  </div>
+  <div class="view on" id="viewDays">
+    <section class="card" id="period"></section>
+    <div class="section-head"><h2>Days</h2><button class="add-btn" data-act="add">+ Add day</button></div>
+    <div class="list" id="history"></div>
+  </div>
 </main>
+
+<!-- Simple layout: bottom tabs -->
+<nav class="tabs" aria-label="Sections">
+  <button data-tab="today" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>Today</button>
+  <button data-tab="days"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Days</button>
+  <button data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>Settings</button>
+</nav>
 
 <!-- Edit / add a day -->
 <dialog id="dlgEdit">
@@ -258,10 +344,11 @@ dialog::backdrop{background:rgba(0,0,0,.42)}
 
     <p class="group-title">Period</p>
     <div class="group">
+      <div class="field col"><span>My contract (hours per week)</span><div class="seg contract" data-picker="contract"></div></div>
+      <div class="field col"><span>My attendance days</span><div class="days" data-picker="days"></div></div>
       <label class="field"><span>Period starts on day</span><input type="number" id="setStart" min="1" max="28" inputmode="numeric"></label>
-      <div class="field col"><span>My attendance days</span><div class="days" id="setWorkdays"></div></div>
     </div>
-    <p class="group-note" id="workdaysNote"></p>
+    <p class="group-note" data-picker="note"></p>
 
     <p class="group-title">Check-in reminder</p>
     <div class="group">
@@ -277,6 +364,8 @@ dialog::backdrop{background:rgba(0,0,0,.42)}
 
     <p class="group-title">Display</p>
     <div class="group">
+      <label class="field"><span>Layout</span>
+        <select id="setLayout"><option value="simple">Simple (one button)</option><option value="classic">Classic (all on one page)</option></select></label>
       <label class="field"><span>24-hour clock</span><input type="checkbox" id="setClock24"></label>
     </div>
 
@@ -289,8 +378,53 @@ dialog::backdrop{background:rgba(0,0,0,.42)}
     <p class="group-note">Your data lives only on this phone. Export a backup now and then (save it to Files / iCloud Drive).</p>
     <input type="file" id="fileImport" accept="application/json,.json" hidden>
 
+    <div class="group" style="margin-top:14px">
+      <button class="field btn" id="btnSetup">Setup guide (step by step)</button>
+      <button class="field btn" id="btnNews">What's new in this version</button>
+    </div>
+
     <p class="group-title">How it counts</p>
     <div class="group"><ul class="rules" id="rulesList"></ul></div>
+  </div>
+</dialog>
+
+<!-- First-time setup guide -->
+<dialog id="dlgSetup">
+  <div class="sheet setup">
+    <div class="setup-top"><div class="dots" id="setupDots"></div><button type="button" class="link" id="setupSkip">Skip</button></div>
+    <div id="setupBody"></div>
+    <div class="setup-nav">
+      <button type="button" class="secondary" id="setupBack">Back</button>
+      <button type="button" class="primary" id="setupNext">Next</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- What's new (shown once after an update) -->
+<dialog id="dlgNews">
+  <div class="sheet news">
+    <div class="sheet-head"><span style="min-width:64px"></span><h2>What's new</h2><button class="done" data-close>Done</button></div>
+
+    <h3>✨ A simpler look</h3>
+    <p>Today is now one ring and one big <b>Check in / Check out</b> button. Your days are in the <b>Days</b> tab at the bottom. Prefer the old screen? Settings → <b>Layout</b> → <b>Classic</b>.</p>
+
+    <h3>1 · Choose your contract</h3>
+    <p>How many hours a week does your contract require? Your weekly and period targets now follow it.</p>
+    <div class="group">
+      <div class="seg contract" data-picker="contract"></div>
+    </div>
+    <p style="margin-top:12px">Then tap <b>your</b> attendance days:</p>
+    <div class="group"><div class="days" data-picker="days"></div></div>
+    <p class="group-note" data-picker="note"></p>
+
+    <h3>2 · Extra days, same rules</h3>
+    <p>Coming in on another day still adds positive hours, and now follows the same rules: check in by 12:00 PM, stay at least 4h, 8:00 AM–7:00 PM.</p>
+
+    <h3>3 · “This week”</h3>
+    <p>See your hours this week (Saturday–Friday) against your contract, right under the button.</p>
+
+    <button class="primary" data-close>Got it</button>
+    <p class="group-note" style="text-align:center;margin-top:10px">You can change this any time in Settings ⚙️.</p>
   </div>
 </dialog>
 
@@ -312,11 +446,16 @@ const DEFAULTS = {
   step: 15,           // rounding step in minutes
   outRound: 'up',     // check-out rounding: up (4:19 → 4:30) | down | exact | nearest
   periodStart: 16,    // period runs from this day to the day before it next month
+  contractDays: 3,    // contract: 3 days = 21h/week, 4 = 28h, 5 = 35h (days × target)
   workdays: [2, 4, 6], // attendance days (0=Sun … 6=Sat): Tue, Thu, Sat. Hours on other days are pure extra
   clock24: false,
   shortcutOn: false,  // run the "Hours Check-in" iPhone shortcut on check-in (feeds the 11:30 reminder)
-  remindAt: 690       // reminder time (11:30)
+  remindAt: 690,      // reminder time (11:30)
+  layout: 'simple',   // 'simple' (ring + one big button + tabs, default) or 'classic' (everything on one page)
+  seenNews: 0,        // last "What's new" shown
+  setupDone: false    // first-time setup guide finished or skipped
 };
+const NEWS_ID = 1;    // bump to show the "What's new" sheet again after an update
 const SHORTCUT_NAME = 'Hours Check-in';
 const SHORTCUT_FILE = 'hours-checkin.txt';
 function load() {
@@ -328,11 +467,13 @@ function load() {
       settings.v = DEFAULTS.v;
       delete settings.weekend; // replaced by workdays
       if (!Array.isArray(settings.workdays) || !settings.workdays.length) settings.workdays = DEFAULTS.workdays.slice();
+      if (!(s.settings && s.settings.contractDays)) settings.contractDays = settings.workdays.length; // keep existing setups as they are
       return { settings, days: s.days };
     }
   } catch (e) {}
   return { settings: { ...DEFAULTS }, days: {} };
 }
+const firstRun = !localStorage.getItem(KEY); // nothing saved yet on this device → show the setup guide
 let state = load();
 const save = () => localStorage.setItem(KEY, JSON.stringify(state));
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
@@ -421,7 +562,7 @@ function analyze(k, rec, liveNow) {
   if (type !== 'leave' && rec.in) {
     a.inRaw = toMin(rec.in);
     a.inR = clampIn(a.inRaw);
-    a.late = workday && type === 'work' && a.inRaw > st.latest;
+    a.late = type === 'work' && a.inRaw > st.latest; // same rule on extra days
     if (rec.out) {
       a.outRaw = toMin(rec.out);
       a.outR = clampOut(a.outRaw);
@@ -434,7 +575,7 @@ function analyze(k, rec, liveNow) {
   a.done = !a.open;
   a.total = a.worked + a.credit;
   a.diff = a.total - a.required;
-  a.underMin = a.done && workday && type === 'work' && a.worked < st.minimum;
+  a.underMin = a.done && type === 'work' && a.worked < st.minimum; // same rule on extra days
   return a;
 }
 
@@ -523,13 +664,13 @@ function renderToday() {
   if (!rec || !rec.in) {
     const half = type === 'half', pills = [];
     if (half) pills.push(`<span class="pill accent">Half day · ${fmtDur(halfCredit())} credited</span>`);
-    if (!workday) pills.push(`<span class="pill accent">Not an attendance day — hours count as extra</span>`);
-    else if (now < st.earliest) pills.push(`<span class="pill">Counting starts at ${fmtClock(st.earliest)}</span>`);
+    if (!workday) pills.push(`<span class="pill accent">Extra day — hours count as extra (same rules)</span>`);
+    if (now < st.earliest) pills.push(`<span class="pill">Counting starts at ${fmtClock(st.earliest)}</span>`);
     else if (now >= st.latestOut) pills.push(`<span class="pill bad">After ${fmtClock(st.latestOut)} — nothing counts now</span>`);
     else if (!half) {
       const left = st.latest - now;
       pills.push(left < 0 ? `<span class="pill bad">Past the ${fmtClock(st.latest)} check-in limit</span>`
-        : now >= st.remindAt ? `<span class="pill bad">⏰ Not checked in — ${fmtDur(left)} left until ${fmtClock(st.latest)}</span>`
+        : workday && now >= st.remindAt ? `<span class="pill bad">⏰ Not checked in — ${fmtDur(left)} left until ${fmtClock(st.latest)}</span>`
         : `<span class="pill ${left <= 30 ? 'warn' : 'good'}">Latest check-in ${fmtClock(st.latest)} · ${fmtDur(left)} left</span>`);
     }
     el.innerHTML = `${head}
@@ -551,7 +692,7 @@ function renderToday() {
   if (a.open) {
     const prior = summarize(periodByOffset(0)).balance; // today is excluded while open
     const needFull = Math.max(0, a.required - a.credit);
-    const minNeed = a.workday && a.type === 'work' ? st.minimum : 0;
+    const minNeed = a.type === 'work' ? st.minimum : 0; // 4h minimum on extra days too
     const items = [];
     if (minNeed) items.push({ lbl: 'Minimum', sub: fmtDur(minNeed), need: minNeed });
     if (needFull) items.push({ lbl: a.type === 'half' ? 'Complete the day' : 'Full day',
@@ -583,6 +724,9 @@ function renderToday() {
       const right = a.total >= a.required ? '✓ full day' : `${fmtDur(a.required - a.total)} to full day`;
       progress = `<div class="progress"><div class="fill" style="width:${pct}%"></div>${minNeed ? `<div class="mark" style="left:${Math.min(100, minNeed / a.required * 100)}%"></div>` : ''}</div>
         <div class="progress-legend"><span>${left}</span><span>${right}</span></div>`;
+    } else if (minNeed) { // extra day: progress toward the 4h minimum
+      progress = `<div class="progress"><div class="fill" style="width:${Math.min(100, a.worked / minNeed * 100)}%"></div></div>
+        <div class="progress-legend"><span>Extra day</span><span>${a.worked >= minNeed ? '✓ minimum done' : `${fmtDur(minNeed - a.worked)} to the ${fmtDur(minNeed)} minimum`}</span></div>`;
     }
     el.innerHTML = `${head}
       <div class="center" style="margin-top:12px">
@@ -670,6 +814,7 @@ function renderPeriod() {
       <div class="stat"><b>${fmtDur(sum.target)}</b><span>target · ${plural(sum.targetDays, 'day')}</span></div>
       <div class="stat"><b>${fmtDur(Math.max(0, sum.target - sum.total))}</b><span>left</span></div>
     </div>
+    ${cur && hasData ? weekHtml() : ''}
     ${hasData ? `<div class="breakdown">${breakdown.join(' · ')}</div>` : ''}
     ${flags.length ? `<div class="pills">${flags.join('')}</div>` : ''}
     ${hint ? `<div class="hint">${hint}</div>` : ''}`;
@@ -706,6 +851,27 @@ function renderPeriod() {
   $('#history').innerHTML = rows || `<div class="empty">No days logged in this period yet.</div>`;
 }
 
+// "This week" (Saturday → Friday): hours so far vs the weekly contract (days × 7h)
+function weekNumbers() {
+  const st = S(), tk = todayKey();
+  const start = addDays(tk, -((dateOf(tk).getDay() + 1) % 7)), end = addDays(start, 6);
+  let total = 0;
+  for (let k = start; k <= tk; k = addDays(k, 1)) {
+    const a = analyze(k, state.days[k], k === tk ? nowMin() : null);
+    if (a) total += a.total; // includes today's running hours
+  }
+  return { start, end, total, target: st.workdays.length * st.target };
+}
+function weekHtml() {
+  const { start, end, total, target } = weekNumbers(), pct = target ? Math.min(100, total / target * 100) : 0;
+  const status = total >= target ? `<span class="good-t">✓ ${total > target ? fmtDur(total - target) + ' extra' : 'done'}</span>` : `${fmtDur(target - total)} to go`;
+  return `<div class="week">
+    <div class="week-top"><span>This week · ${fmtDate(start, { day: 'numeric', month: 'short' })} – ${fmtDate(end, { day: 'numeric', month: 'short' })}</span>
+      <b>${fmtDur(total)} / ${fmtDur(target)}</b></div>
+    <div class="bar"><i style="width:${pct}%"></i></div>
+    <div class="week-sub">${status}</div></div>`;
+}
+
 // Red banner at the top while the current period has missing days or missing check-outs
 function renderAlert() {
   const st = S(), probs = summarize(periodByOffset(0)).problems;
@@ -720,7 +886,126 @@ function renderAlert() {
     <div class="fix">${chips}</div></div>`;
 }
 
-function render() { renderAlert(); renderToday(); renderPeriod(); }
+/* ---------- Simple layout (Option A): ring + one big button + summary ---------- */
+function ringSvg(frac, color) {
+  const C = 2 * Math.PI * 100, f = Math.max(0, Math.min(1, frac || 0));
+  return `<svg width="236" height="236" viewBox="0 0 236 236" aria-hidden="true">
+    <defs><linearGradient id="ringGrad" x1="0" x2="1"><stop offset="0" style="stop-color:var(--accent)"/><stop offset="1" style="stop-color:var(--accent-2)"/></linearGradient></defs>
+    <circle cx="118" cy="118" r="100" fill="none" style="stroke:var(--track)" stroke-width="18"/>
+    ${f > 0 ? `<circle cx="118" cy="118" r="100" fill="none" ${color ? `style="stroke:${color}"` : 'stroke="url(#ringGrad)"'} stroke-width="18" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C * (1 - f)).toFixed(1)}"/>` : ''}
+  </svg>`;
+}
+
+function renderTodaySimple() {
+  const el = $('#todaySimple'), st = S(), tk = todayKey(), now = nowMin(), rec = state.days[tk];
+  const workday = !isWeekend(tk), type = typeOf(rec);
+  const ring = (frac, big, small, color, text) => `<div class="ring${text ? ' text' : ''}">${ringSvg(frac, color)}<div class="c"><b>${big}</b><span>${small}</span></div></div>`;
+
+  // Holiday
+  if (rec && type === 'leave') {
+    el.innerHTML = ring(1, 'Holiday', `counts as ${fmtDur(workday ? st.target : 0)}`, 'var(--accent)', true)
+      + `<div class="s-status">Enjoy your day off</div><button class="big-btn soft" data-edit="${tk}">Change</button>`;
+    return;
+  }
+
+  // Not checked in yet
+  if (!rec || !rec.in) {
+    const half = type === 'half', parts = [];
+    if (!workday) parts.push('Extra day');
+    if (half) parts.push(`Half day · <b>${fmtDur(halfCredit())}</b> credited`);
+    if (now < st.earliest) parts.push(`Counting starts at <b>${fmtClock(st.earliest)}</b>`);
+    else if (now >= st.latestOut) parts.push(`<span class="bad-t">After ${fmtClock(st.latestOut)} nothing counts</span>`);
+    else if (!half) parts.push(now > st.latest ? `<span class="bad-t">Past the ${fmtClock(st.latest)} check-in limit</span>`
+      : `${workday && now >= st.remindAt ? '<span class="bad-t">⏰ Not checked in</span> · ' : ''}Check in by <b>${fmtClock(st.latest)}</b> (${fmtDur(st.latest - now)} left)`);
+    const credit = half ? halfCredit() : 0;
+    el.innerHTML = ring(credit / st.target, fmtDur(credit), workday ? `of ${fmtDur(st.target)} today` : 'extra day')
+      + `<div class="s-status">${parts.join(' · ')}</div>
+      <button class="big-btn" data-act="checkin">Check in<small>counts as ${fmtClock(clampIn(now))}</small></button>
+      ${!rec && workday ? `<div class="quick"><button data-act="mark-half">Half day</button><button data-act="mark-leave">Holiday</button></div>` : ''}
+      ${rec ? `<button class="ghost" data-edit="${tk}">Change</button>` : `<button class="ghost" data-act="edit-today">Enter a different time</button>`}`;
+    return;
+  }
+
+  const a = analyze(tk, rec, now);
+
+  // At work
+  if (a.open) {
+    const prior = summarize(periodByOffset(0)).balance;
+    const needFull = Math.max(0, a.required - a.credit), minNeed = a.type === 'work' ? st.minimum : 0;
+    const tile = (label, need) => {
+      const tRaw = earliestOut(a.inR + need), capped = tRaw > st.latestOut, t = capped ? st.latestOut : tRaw, reached = !capped && now >= t;
+      return `<div class="${reached ? 'ok' : capped ? 'cap' : ''}"><span>${label}</span><b>${reached ? '✓ ' : ''}${fmtClock(t)}</b></div>`;
+    };
+    const tiles = [];
+    if (minNeed) tiles.push(tile(`${fmtDur(minNeed)} minimum`, minNeed));
+    if (needFull) tiles.push(tile(a.type === 'half' ? 'Complete the day' : `Full day (${fmtDur(needFull)})`, needFull));
+    let note = '';
+    const even = Math.max(minNeed, needFull - prior);
+    if (prior < 0 && even > Math.max(needFull, minNeed)) {
+      const tRaw = earliestOut(a.inR + even);
+      note = tRaw > st.latestOut ? `Your period is ${fmtDur(prior, true)}. Staying till ${fmtClock(st.latestOut)} clears as much as possible today.`
+        : `Leave at <b>${fmtClock(tRaw)}</b> to clear your ${fmtDur(prior, true)}.`;
+    } else if (prior > 0 && needFull && even < needFull) {
+      note = `You're ${fmtDur(prior)} ahead — you could leave at <b>${fmtClock(earliestOut(a.inR + even))}</b>.`;
+    }
+    const flags = [];
+    if (a.late) flags.push(`<span class="bad-t">late check-in</span>`);
+    if (now >= st.latestOut) flags.push(`<span class="warn-t">counting stopped at ${fmtClock(st.latestOut)}</span>`);
+    const frac = a.workday ? a.total / a.required : minNeed ? a.worked / minNeed : 1;
+    el.innerHTML = ring(frac, fmtDur(a.workday ? a.total : a.worked), a.workday ? `of ${fmtDur(a.required)} today` : `extra · ${fmtDur(minNeed)} minimum`)
+      + `<div class="s-status">At work since <b>${fmtClock(a.inR)}</b>${a.credit ? ` · incl. ${fmtDur(a.credit)} half-day` : ''}${flags.length ? ' · ' + flags.join(' · ') : ''}</div>
+      <button class="big-btn" data-act="checkout">Check out<small>counts as ${fmtClock(clampOut(now))}</small></button>
+      ${tiles.length ? `<div class="s-tiles"${tiles.length === 1 ? ' style="grid-template-columns:1fr"' : ''}>${tiles.join('')}</div>` : ''}
+      ${note ? `<div class="s-note">${note}</div>` : ''}
+      <button class="ghost" data-edit="${tk}">Edit times</button>`;
+    return;
+  }
+
+  // Finished for today
+  const flags = [];
+  if (a.underMin) flags.push(`<span class="bad-t">below ${fmtDur(st.minimum)}</span>`);
+  if (a.late) flags.push('<span class="bad-t">late check-in</span>');
+  const full = a.workday && a.total >= a.required;
+  el.innerHTML = ring(a.workday ? a.total / a.required : 1, fmtDur(a.total), a.workday ? 'done today' : 'extra today', full ? 'var(--good)' : '')
+    + `<div class="s-status">${a.inR != null ? `${fmtClock(a.inR)} – ${fmtClock(a.outR)} · ` : ''}<b class="${cls(a.diff)}-t">${a.workday ? `${fmtDiff(a.diff)} vs ${fmtDur(a.required)}` : `${fmtDur(a.total, true)} extra`}</b>${flags.length ? ' · ' + flags.join(' · ') : ''}</div>
+    <button class="big-btn soft" data-edit="${tk}">Edit today</button>`;
+}
+
+function renderSummary() {
+  const p = periodByOffset(0), b = summarize(p).balance, w = weekNumbers();
+  const pct = w.target ? Math.min(100, w.total / w.target * 100) : 0;
+  $('#summary').innerHTML = `<button class="sum-box" data-tab="days">
+    <div class="sum-row"><span>This period · ${fmtDate(p.start, { day: 'numeric', month: 'short' })} – ${fmtDate(p.end, { day: 'numeric', month: 'short' })}</span><b class="${cls(b)}-t">${b === 0 ? '0h' : fmtDur(b, true)}</b></div>
+    <div class="sum-row2"><div class="sum-row"><span>This week</span><b>${fmtDur(w.total)} / ${fmtDur(w.target)}</b></div><div class="bar"><i style="width:${pct}%"></i></div></div>
+    <div class="sum-more">See all days ›</div></button>`;
+}
+
+// Tabs (Simple layout only)
+let currentTab = 'today';
+function setTab(t) {
+  if (t === 'settings') { fillSettings(); dlgSettings.showModal(); return; }
+  currentTab = t;
+  $('#viewToday').classList.toggle('on', t === 'today');
+  $('#viewDays').classList.toggle('on', t === 'days');
+  document.querySelectorAll('.tabs [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+  window.scrollTo(0, 0);
+}
+function applyLayout() {
+  const simple = S().layout === 'simple';
+  document.body.classList.toggle('simple', simple);
+  if (simple) setTab(currentTab);
+  else { $('#viewToday').classList.add('on'); $('#viewDays').classList.add('on'); }
+}
+document.addEventListener('click', e => { const t = e.target.closest('[data-tab]'); if (t) setTab(t.dataset.tab); });
+
+function render() {
+  const st = S();
+  renderAlert();
+  $('#hdrDate').textContent = fmtDate(todayKey(), { weekday: 'long', day: 'numeric', month: 'long' });
+  $('#hdrBadge').textContent = `${fmtDur(st.workdays.length * st.target)} / week`;
+  if (st.layout === 'simple') { renderTodaySimple(); renderSummary(); } else renderToday();
+  renderPeriod();
+}
 
 /* ---------- actions ---------- */
 let toastTimer;
@@ -731,7 +1016,7 @@ function toast(msg) {
 
 function checkIn() {
   const st = S(), tk = todayKey(), now = nowMin(), rec = state.days[tk] || {};
-  if (!isWeekend(tk) && typeOf(rec) === 'work' && now > st.latest &&
+  if (typeOf(rec) === 'work' && now > st.latest &&
       !confirm(`It's past ${fmtClock(st.latest)}, the latest check-in. Register anyway?`)) return;
   state.days[tk] = { ...rec, in: toHHMM(now) };
   save(); render();
@@ -742,7 +1027,7 @@ function checkOut() {
   const st = S(), tk = todayKey(), rec = state.days[tk];
   if (!rec) return;
   const now = nowMin(), a = analyze(tk, { ...rec, out: toHHMM(now) });
-  if (a.workday && a.type === 'work' && a.worked < st.minimum &&
+  if (a.type === 'work' && a.worked < st.minimum &&
       !confirm(`Only ${fmtDur(a.worked)} counted — below the ${fmtDur(st.minimum)} minimum. Check out anyway?`)) return;
   rec.out = toHHMM(now);
   save(); render();
@@ -872,11 +1157,10 @@ function fillSettings() {
   $('#setOut').value = st.outRound;
   $('#setStart').value = st.periodStart;
   $('#setClock24').checked = st.clock24;
+  $('#setLayout').value = st.layout === 'simple' ? 'simple' : 'classic';
   $('#setShortcut').checked = st.shortcutOn;
   $('#setRemindAt').value = toHHMM(st.remindAt);
-  $('#setWorkdays').innerHTML = WEEK_ORDER.map(i => `<button type="button" data-day="${i}" aria-pressed="${st.workdays.includes(i)}" aria-label="${DAY_NAMES[i]}">${DAY_NAMES[i].slice(0, 2)}</button>`).join('');
-  const nDays = st.workdays.length;
-  $('#workdaysNote').textContent = `${plural(nDays, 'day')} a week × ${fmtDur(st.target)} = ${fmtDur(nDays * st.target)} a week, ${fmtDur(2 * nDays * st.target)} every 2 weeks. Hours on other days count as extra.`;
+  refreshPickers();
   const short = m => fmtClock(m).replace(/ [AP]M/, '');
   $('#inRoundNote').textContent = `Up: ${[577, 659, 661].map(m => `${short(m)}→${short(roundIn(m))}`).join(', ')}`;
   $('#outRoundNote').textContent = `Check-out examples: ${[979, 990, 991].map(m => `${short(m)} → ${short(roundOut(m))}`).join(', ')}.`;
@@ -911,7 +1195,8 @@ function fillSettings() {
   $('#rulesList').innerHTML = `
     <li>Check-in rounds <b>up</b> to the next ${st.step} min (9:37 → 9:45). Before ${fmtClock(st.earliest)} counts as ${fmtClock(st.earliest)}. Latest check-in ${fmtClock(st.latest)}.</li>
     <li>Check-out ${{ down: 'rounds down', exact: 'uses the exact minute', nearest: 'rounds to the nearest', up: 'rounds up' }[st.outRound]}${st.outRound === 'exact' ? '' : ` to ${st.step} min`}. After ${fmtClock(st.latestOut)} counts as ${fmtClock(st.latestOut)}.</li>
-    <li>Each attendance day (${daysText()}) needs ${fmtDur(st.target)}, with at least ${fmtDur(st.minimum)} on the day. Hours on any other day count as extra.</li>
+    <li>Your contract: ${fmtDur(st.workdays.length * st.target)} a week = ${st.workdays.length} attendance days (${daysText()}) × ${fmtDur(st.target)}, with at least ${fmtDur(st.minimum)} on each day.</li>
+    <li>You can also come on other days: those hours count as extra (positive) hours, with the same rules — check in by ${fmtClock(st.latest)}, stay at least ${fmtDur(st.minimum)}.</li>
     <li>A half day adds ${fmtDur(halfCredit())}; a holiday adds ${fmtDur(st.target)}.</li>
     <li>Period target = ${fmtDur(st.target)} × your attendance days from day ${st.periodStart} to day ${st.periodStart === 1 ? 'end of month' : st.periodStart - 1 + ' of next month'} (e.g. ${plural(2 * st.workdays.length, 'day')} in 2 weeks = ${fmtDur(2 * st.workdays.length * st.target)}), counted from the start of the period you began using the app.</li>
     <li>A past attendance day with nothing logged is a <b>missing day</b>: it counts as 0h (−${fmtDur(st.target)}) and is highlighted in red until you add your times or mark it as a holiday or half day. A day with no check-out counts the same way.</li>
@@ -934,18 +1219,63 @@ dlgSettings.addEventListener('change', e => {
   else if (t.id === 'setOut') st.outRound = t.value;
   else if (t.id === 'setStart') { const v = parseInt(t.value, 10); if (v >= 1 && v <= 28) { st.periodStart = v; viewOffset = 0; } }
   else if (t.id === 'setClock24') st.clock24 = t.checked;
+  else if (t.id === 'setLayout') { st.layout = t.value === 'simple' ? 'simple' : 'classic'; save(); applyLayout(); }
   else if (t.id === 'setShortcut') st.shortcutOn = t.checked;
   else if (t.id === 'setRemindAt' && t.value) st.remindAt = toMin(t.value);
   else return;
   save(); fillSettings(); render();
 });
-$('#setWorkdays').addEventListener('click', e => {
-  const b = e.target.closest('[data-day]'); if (!b) return;
-  const d = Number(b.dataset.day), w = new Set(S().workdays);
-  if (w.has(d)) { if (w.size === 1) { toast('Keep at least one attendance day'); return; } w.delete(d); }
-  else w.add(d);
-  state.settings.workdays = [...w].sort();
-  save(); fillSettings(); render();
+/* ---------- contract (hours per week) + attendance days ---------- */
+const CONTRACTS = [3, 4, 5]; // days per week → 21h / 28h / 35h with 7h days
+
+// Draw every contract picker and day picker on the page (Settings and What's new)
+function refreshPickers() {
+  const st = S(), n = st.workdays.length, c = st.contractDays;
+  document.querySelectorAll('[data-picker=contract]').forEach(el => {
+    el.innerHTML = CONTRACTS.map(d => `<button type="button" data-contract="${d}" aria-pressed="${c === d}"><b>${fmtDur(d * st.target)}</b><small>${d} days</small></button>`).join('');
+  });
+  document.querySelectorAll('[data-picker=days]').forEach(el => {
+    el.innerHTML = WEEK_ORDER.map(i => `<button type="button" data-day="${i}" aria-pressed="${st.workdays.includes(i)}" aria-label="${DAY_NAMES[i]}">${DAY_NAMES[i].slice(0, 2)}</button>`).join('');
+  });
+  const ok = n === c;
+  const note = ok
+    ? `${daysText()}: ${plural(n, 'day')} × ${fmtDur(st.target)} = ${fmtDur(n * st.target)} a week, ${fmtDur(2 * n * st.target)} every 2 weeks. Hours on other days count as extra, with the same rules.`
+    : `Your contract is ${c} days — select exactly ${c} (now ${n}). Until then, targets use the ${n} selected day${n === 1 ? '' : 's'}.`;
+  document.querySelectorAll('[data-picker=note]').forEach(el => { el.textContent = note; el.classList.toggle('bad-t', !ok); });
+  if ($('#dlgSetup').open) updateSetupNext(); // the guide's Next button waits for the right number of days
+}
+
+function setContract(n) {
+  const st = state.settings;
+  st.contractDays = n;
+  // keep your current days where possible, then fill or trim in week order (Saturday first, Friday last)
+  let w = WEEK_ORDER.filter(d => st.workdays.includes(d));
+  while (w.length > n) w.pop();
+  for (const d of [6, 0, 1, 2, 3, 4, 5]) { if (w.length >= n) break; if (d !== 5 && !w.includes(d)) w.push(d); }
+  for (const d of WEEK_ORDER) { if (w.length >= n) break; if (!w.includes(d)) w.push(d); }
+  st.workdays = w.sort();
+  save(); refreshPickers(); render();
+  toast(`Contract: ${fmtDur(n * st.target)} a week — now check your ${n} days`);
+}
+
+function toggleDay(d) {
+  const st = state.settings, w = new Set(st.workdays), n = st.contractDays;
+  if (w.has(d)) {
+    if (w.size === 1) { toast('Keep at least one attendance day'); return; }
+    w.delete(d);
+  } else {
+    if (w.size >= n) { toast(`Your contract is ${n} days — tap one of your days to remove it first`); return; }
+    w.add(d);
+  }
+  st.workdays = [...w].sort();
+  save(); refreshPickers(); render();
+}
+
+document.addEventListener('click', e => {
+  const c = e.target.closest('[data-contract]');
+  if (c) { setContract(Number(c.dataset.contract)); return; }
+  const d = e.target.closest('[data-picker=days] [data-day]');
+  if (d) toggleDay(Number(d.dataset.day));
 });
 
 $('#btnExport').addEventListener('click', async () => {
@@ -971,6 +1301,7 @@ $('#fileImport').addEventListener('change', async e => {
     const n = Object.keys(data.days).length;
     if (!confirm(`Replace everything on this phone with the backup (${plural(n, 'day')})?`)) return;
     state = { settings: { ...DEFAULTS, ...data.settings }, days: data.days };
+    if (!(data.settings && data.settings.contractDays)) state.settings.contractDays = state.settings.workdays.length;
     save(); viewOffset = 0; fillSettings(); render(); toast('Backup restored');
   } catch (err) { alert('That file is not a valid backup.'); }
 });
@@ -981,10 +1312,119 @@ $('#btnReset').addEventListener('click', () => {
 
 /* ---------- wiring ---------- */
 $('#btnSettings').addEventListener('click', () => { fillSettings(); dlgSettings.showModal(); });
+
+// "What's new": shown once per update (NEWS_ID), and from Settings any time
+const dlgNews = $('#dlgNews');
+function openNews() {
+  refreshPickers(); dlgNews.showModal();
+  if ((S().seenNews || 0) < NEWS_ID) { state.settings.seenNews = NEWS_ID; save(); } // show it once
+}
+$('#btnNews').addEventListener('click', () => { dlgSettings.close(); openNews(); });
+
+/* ---------- first-time setup guide ---------- */
+const dlgSetup = $('#dlgSetup');
+let setupStep = 0;
+const isStandalone = () => navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
+const isIOS = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const tip = (ico, title, text) => `<div class="tip"><div class="ico">${ico}</div><div><b>${title}</b><span>${text}</span></div></div>`;
+
+function setupSteps() {
+  const st = S();
+  const steps = [{
+    html: () => `<img class="welcome-icon" src="icon-192.png" alt="">
+      <div class="title center">Welcome to Hours</div>
+      <p class="lead center">Hours keeps track of your fingerprint times at the university. It rounds your times like the fingerprint system, tells you when you can leave, and adds up your hours for each period (day ${st.periodStart} → day ${st.periodStart - 1 || 'end'}).</p>
+      <p class="lead center">Setup takes about one minute.</p>`,
+    next: 'Start setup'
+  }];
+  if (!isStandalone()) steps.push({
+    html: () => `<div class="title">First, put Hours on your Home Screen</div>
+      <p class="lead">Then it opens like a normal app and works without internet.</p>
+      ${isIOS() ? `
+        ${tip('1', 'Tap the Share button', 'The square with an arrow pointing up. On the newest iPhones tap <b>•••</b> first, then <b>Share</b>.')}
+        ${tip('2', 'Tap “Add to Home Screen”', 'Scroll down in the menu if you don’t see it, then tap <b>Add</b>.')}
+        ${tip('3', 'Open Hours from the new icon', 'Close Safari and tap the <b>Hours</b> icon. Do this setup there.')}`
+      : `${tip('1', 'Open your browser menu', 'Usually <b>⋮</b> or the Share button.')}
+        ${tip('2', 'Choose “Add to Home screen” or “Install app”', 'Then open Hours from the new icon and do this setup there.')}`}
+      ${tip('⚠️', 'Important', 'Safari and the Home Screen app keep separate data. Always use the Home Screen icon.')}`,
+    next: 'Continue here anyway'
+  });
+  steps.push({
+    html: () => `<div class="title">How many hours a week is your contract?</div>
+      <p class="lead">Each attendance day is ${fmtDur(st.target)}. Pick the one in your contract.</p>
+      <div class="group" style="padding:10px 12px"><div class="seg contract" data-picker="contract"></div></div>`
+  }, {
+    html: () => `<div class="title">Which days must you attend?</div>
+      <p class="lead">Tap exactly <b>${st.contractDays}</b> days. You can still come on other days — those hours count as extra.</p>
+      <div class="group" style="padding:10px 12px"><div class="days" data-picker="days"></div></div>
+      <p class="group-note" data-picker="note"></p>`,
+    valid: () => S().workdays.length === S().contractDays
+  }, {
+    html: () => `<div class="title">The rules the app follows</div>
+      <p class="lead">These match the university's fingerprint system.</p>
+      ${tip('🕗', `Counting is ${fmtClock(st.earliest)} – ${fmtClock(st.latestOut)}`, `A fingerprint before ${fmtClock(st.earliest)} counts as ${fmtClock(st.earliest)}; after ${fmtClock(st.latestOut)} it counts as ${fmtClock(st.latestOut)}.`)}
+      ${tip('⏰', `Latest check-in ${fmtClock(st.latest)}`, 'Later check-ins are marked “late”.')}
+      ${tip('🔼', 'Times round up to 15 minutes', 'Check-in 9:37 → 9:45. Check-out 4:19 → 4:30.')}
+      ${tip('⏱️', `${fmtDur(st.target)} per attendance day, at least ${fmtDur(st.minimum)}`, `If you do only ${fmtDur(st.minimum)}, the missing ${fmtDur(st.target - st.minimum)} is added as debt — make it up on other days before day ${st.periodStart - 1 || 'end'}.`)}
+      ${tip('🏖️', `Holiday = ${fmtDur(st.target)}, half day = ${fmtDur(halfCredit())}`, 'Mark them in the app so they count.')}
+      <p class="group-note">Different rules? You can change them later in Settings ⚙️.</p>`,
+    next: 'Looks right'
+  }, {
+    html: () => `<div class="title">How to use it every day</div>
+      ${tip('👆', 'Arrive: do the fingerprint, then tap “Check in”', 'The big button shows the time it counts, e.g. 9:37 → 9:45.')}
+      ${tip('🕓', 'Watch the ring', `It fills up toward ${fmtDur(st.target)}. The two boxes under the button tell you when you reach the ${fmtDur(st.minimum)} minimum and the full day.`)}
+      ${tip('👋', 'Leave: do the fingerprint, then tap “Check out”', 'Your day, week and period update right away.')}
+      ${tip('✏️', 'Forgot to tap?', 'Open the <b>Days</b> tab at the bottom (or tap “Enter a different time”) and type the times.')}
+      ${tip('🏖️', 'Day off?', 'Tap <b>Holiday</b> or <b>Half day</b> under the Check in button.')}
+      ${tip('⚠️', 'Red banner = missing day', 'A day you should have attended counts as 0h until you add it. Tap it to fix.')}`
+  }, {
+    html: () => `<img class="welcome-icon" src="icon-192.png" alt="">
+      <div class="title center">You're all set!</div>
+      <p class="lead center">Your contract: <b>${fmtDur(S().workdays.length * st.target)} a week</b> on <b>${daysText()}</b>.</p>
+      ${tip('💾', 'Back up once a month', 'Settings ⚙️ → Export backup. Your data lives only on this phone.')}
+      ${tip('🔔', 'Optional: 11:30 reminder', 'Get notified if you haven’t checked in — Settings ⚙️ → Check-in reminder.')}
+      ${tip('❓', 'See this guide again', 'Settings ⚙️ → Setup guide.')}`,
+    next: 'Start using Hours'
+  });
+  return steps;
+}
+
+function renderSetup() {
+  const steps = setupSteps();
+  setupStep = Math.max(0, Math.min(setupStep, steps.length - 1));
+  const s = steps[setupStep];
+  $('#setupBody').innerHTML = s.html();
+  $('#setupDots').innerHTML = steps.map((_, i) => `<i class="${i === setupStep ? 'on' : i < setupStep ? 'done' : ''}"></i>`).join('');
+  $('#setupBack').hidden = setupStep === 0;
+  $('#setupSkip').hidden = setupStep === steps.length - 1;
+  $('#setupNext').textContent = s.next || 'Next';
+  $('.sheet.setup').scrollTop = 0;
+  refreshPickers();
+  updateSetupNext();
+}
+function updateSetupNext() {
+  const s = setupSteps()[setupStep];
+  $('#setupNext').disabled = !!(s && s.valid && !s.valid());
+}
+function openSetup() { setupStep = 0; renderSetup(); dlgSetup.showModal(); }
+function finishSetup() {
+  state.settings.setupDone = true;
+  state.settings.seenNews = NEWS_ID; // the guide already covers what's new
+  save(); dlgSetup.close(); render();
+  toast(S().layout === 'simple' ? 'All set — at the fingerprint, tap “Check in”' : 'All set — at the fingerprint, tap “Check in now”');
+}
+$('#setupNext').addEventListener('click', () => {
+  if (setupStep >= setupSteps().length - 1) finishSetup();
+  else { setupStep++; renderSetup(); }
+});
+$('#setupBack').addEventListener('click', () => { setupStep--; renderSetup(); });
+$('#setupSkip').addEventListener('click', finishSetup);
+dlgSetup.addEventListener('cancel', e => e.preventDefault()); // no closing with Esc halfway
+$('#btnSetup').addEventListener('click', () => { dlgSettings.close(); openSetup(); });
 document.addEventListener('click', e => {
   const close = e.target.closest('[data-close]');
   if (close) { close.closest('dialog').close(); return; }
-  if (e.target.tagName === 'DIALOG') { e.target.close(); return; } // tap on backdrop
+  if (e.target.tagName === 'DIALOG') { if (e.target !== dlgSetup) e.target.close(); return; } // tap on backdrop (the guide stays open)
   const ed = e.target.closest('[data-edit]');
   if (ed) { openEditor(ed.dataset.edit); return; }
   const act = e.target.closest('[data-act]');
@@ -1001,7 +1441,10 @@ document.addEventListener('click', e => {
   }
 });
 
+applyLayout();
 render();
+if (firstRun && !S().setupDone) openSetup();            // brand-new on this device: step-by-step guide
+else if ((S().seenNews || 0) < NEWS_ID) openNews();      // existing users: what changed
 setInterval(() => { if (!document.hidden && !dlgEdit.open) render(); }, 20000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { state = load(); render(); } });
 
