@@ -1,6 +1,6 @@
 // Offline support: serve the app from the phone's cache, refresh it in the background.
 // Bump CACHE when you change any file so phones pick up the new version.
-const CACHE = 'fphours-v6';
+const CACHE = 'fphours-v7';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-180.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

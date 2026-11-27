@@ -48,6 +48,8 @@ button:disabled{opacity:.35;cursor:default}
 .top{display:flex;align-items:center;justify-content:space-between;max-width:560px;margin:0 auto;padding:16px 18px 2px}
 .top h1{margin:0;font-size:30px;letter-spacing:-.025em;font-weight:750}
 .icon-btn{width:40px;height:40px;border-radius:50%;background:var(--card);display:grid;place-items:center;color:var(--accent)}
+.top-right{display:flex;align-items:center;gap:8px}
+.help-btn{font-size:20px;font-weight:750;line-height:1}
 main{max-width:560px;margin:0 auto;padding:2px 14px 48px}
 .card{background:var(--card);border-radius:20px;padding:18px;margin:12px 0}
 .card-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
@@ -143,6 +145,7 @@ main{max-width:560px;margin:0 auto;padding:2px 14px 48px}
 .setup-nav{display:flex;gap:10px;margin-top:18px}
 .setup-nav .primary{margin-top:0;flex:2}
 .setup-nav .secondary{flex:1;padding:16px;border-radius:14px;background:var(--chip);font-weight:600;font-size:17px}
+.news .secondary{display:block;width:100%;margin-top:10px;padding:14px;border-radius:14px;background:var(--chip);color:var(--accent);font-weight:600;font-size:16px}
 .tip{display:flex;gap:12px;align-items:flex-start;background:var(--card);border-radius:14px;padding:12px 14px;margin:8px 0}
 .tip .ico{font-size:22px;line-height:1.25;width:28px;text-align:center;flex:none}
 .tip b{display:block;font-size:15.5px}
@@ -262,10 +265,13 @@ body.simple .toast{bottom:calc(90px + env(safe-area-inset-bottom))}
 <body>
 <header class="top">
   <div><h1>Hours</h1><div class="date-sub" id="hdrDate"></div></div>
+  <div class="top-right">
   <button class="contract-badge" id="hdrBadge" data-tab="settings"></button>
+  <button class="icon-btn help-btn" id="btnHelp" aria-label="How to use Hours">?</button>
   <button class="icon-btn" id="btnSettings" aria-label="Settings">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
   </button>
+  </div>
 </header>
 
 <main>
@@ -382,6 +388,7 @@ body.simple .toast{bottom:calc(90px + env(safe-area-inset-bottom))}
       <button class="field btn" id="btnSetup">Setup guide (step by step)</button>
       <button class="field btn" id="btnNews">What's new in this version</button>
     </div>
+    <p class="group-note" id="appVersion" style="text-align:center"></p>
 
     <p class="group-title">How it counts</p>
     <div class="group"><ul class="rules" id="rulesList"></ul></div>
@@ -423,7 +430,11 @@ body.simple .toast{bottom:calc(90px + env(safe-area-inset-bottom))}
     <h3>3 · “This week”</h3>
     <p>See your hours this week (Saturday–Friday) against your contract, right under the button.</p>
 
+    <h3>❓ Help any time</h3>
+    <p>Tap the <b>?</b> at the top of the screen for a short step-by-step guide to the app.</p>
+
     <button class="primary" data-close>Got it</button>
+    <button class="secondary" id="newsGuide">Show me how to use it (step by step)</button>
     <p class="group-note" style="text-align:center;margin-top:10px">You can change this any time in Settings ⚙️.</p>
   </div>
 </dialog>
@@ -455,7 +466,8 @@ const DEFAULTS = {
   seenNews: 0,        // last "What's new" shown
   setupDone: false    // first-time setup guide finished or skipped
 };
-const NEWS_ID = 1;    // bump to show the "What's new" sheet again after an update
+const NEWS_ID = 2;    // bump to show the "What's new" sheet again after an update
+const APP_VERSION = 7; // shown in Settings; keep in step with CACHE in sw.js
 const SHORTCUT_NAME = 'Hours Check-in';
 const SHORTCUT_FILE = 'hours-checkin.txt';
 function load() {
@@ -1315,11 +1327,15 @@ $('#btnSettings').addEventListener('click', () => { fillSettings(); dlgSettings.
 
 // "What's new": shown once per update (NEWS_ID), and from Settings any time
 const dlgNews = $('#dlgNews');
-function openNews() {
-  refreshPickers(); dlgNews.showModal();
-  if ((S().seenNews || 0) < NEWS_ID) { state.settings.seenNews = NEWS_ID; save(); } // show it once
+function openNews() { refreshPickers(); dlgNews.showModal(); }
+// Mark it seen only once it is dismissed: an update can reload the app right after it opens,
+// and it must then show again instead of being skipped.
+function markNewsSeen() {
+  if ((S().seenNews || 0) < NEWS_ID) { state.settings.seenNews = NEWS_ID; save(); }
 }
+dlgNews.addEventListener('close', markNewsSeen);
 $('#btnNews').addEventListener('click', () => { dlgSettings.close(); openNews(); });
+$('#newsGuide').addEventListener('click', () => { markNewsSeen(); dlgNews.close(); openSetup(); });
 
 /* ---------- first-time setup guide ---------- */
 const dlgSetup = $('#dlgSetup');
@@ -1383,7 +1399,7 @@ function setupSteps() {
       <p class="lead center">Your contract: <b>${fmtDur(S().workdays.length * st.target)} a week</b> on <b>${daysText()}</b>.</p>
       ${tip('💾', 'Back up once a month', 'Settings ⚙️ → Export backup. Your data lives only on this phone.')}
       ${tip('🔔', 'Optional: 11:30 reminder', 'Get notified if you haven’t checked in — Settings ⚙️ → Check-in reminder.')}
-      ${tip('❓', 'See this guide again', 'Settings ⚙️ → Setup guide.')}`,
+      ${tip('❓', 'See this guide again', 'Tap the <b>?</b> at the top of the screen.')}`,
     next: 'Start using Hours'
   });
   return steps;
@@ -1421,10 +1437,16 @@ $('#setupBack').addEventListener('click', () => { setupStep--; renderSetup(); })
 $('#setupSkip').addEventListener('click', finishSetup);
 dlgSetup.addEventListener('cancel', e => e.preventDefault()); // no closing with Esc halfway
 $('#btnSetup').addEventListener('click', () => { dlgSettings.close(); openSetup(); });
+$('#btnHelp').addEventListener('click', openSetup);
+$('#appVersion').textContent = `Hours · version ${APP_VERSION}`;
 document.addEventListener('click', e => {
   const close = e.target.closest('[data-close]');
-  if (close) { close.closest('dialog').close(); return; }
-  if (e.target.tagName === 'DIALOG') { if (e.target !== dlgSetup) e.target.close(); return; } // tap on backdrop (the guide stays open)
+  if (close) { const d = close.closest('dialog'); if (d === dlgNews) markNewsSeen(); d.close(); return; }
+  if (e.target.tagName === 'DIALOG') { // tap on backdrop (the guide stays open)
+    if (e.target === dlgNews) markNewsSeen();
+    if (e.target !== dlgSetup) e.target.close();
+    return;
+  }
   const ed = e.target.closest('[data-edit]');
   if (ed) { openEditor(ed.dataset.edit); return; }
   const act = e.target.closest('[data-act]');
@@ -1443,17 +1465,25 @@ document.addEventListener('click', e => {
 
 applyLayout();
 render();
-if (firstRun && !S().setupDone) openSetup();            // brand-new on this device: step-by-step guide
+// brand-new on this device (or reloaded halfway through the guide): step-by-step guide
+const newUser = !S().setupDone && (firstRun || !Object.keys(state.days).length);
+if (newUser) openSetup();
 else if ((S().seenNews || 0) < NEWS_ID) openNews();      // existing users: what changed
 setInterval(() => { if (!document.hidden && !dlgEdit.open) render(); }, 20000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) { state = load(); render(); } });
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) return;
+  state = load(); render();
+  // iPhone often resumes the app without reloading it, so look for a new version here too
+  if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistration().then(r => r && r.update()).catch(() => {});
+});
 
-// Offline support + pick up new versions: when an update installs, reload once to show it.
+// Offline support + pick up new versions: when an update installs, reload once to show it
+// (not while you're typing a time, in Settings or in the guide; it then shows next time you open the app).
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   const hadController = !!navigator.serviceWorker.controller;
   let reloaded = false;
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (hadController && !reloaded && !dlgEdit.open) { reloaded = true; location.reload(); }
+    if (hadController && !reloaded && !dlgEdit.open && !dlgSettings.open && !dlgSetup.open) { reloaded = true; location.reload(); }
   });
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
